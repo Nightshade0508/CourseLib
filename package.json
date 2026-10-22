@@ -1,0 +1,18 @@
+{
+  "name": "parallel-text-library",
+  "version": "1.0.0",
+  "private": true,
+  "description": "中英对照阅读库：上传 PDF/Word，自动逐段翻译，标注、生词本、学习卡片与本地朗读。AI 功能使用访客自己的 AI 账号。",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:all": "node scripts/build.mjs --all",
+    "dev": "node scripts/build.mjs && node scripts/serve.mjs",
+    "dev:all": "node scripts/build.mjs --all && node scripts/serve.mjs",
+    "vendor:sdk": "node scripts/vendor-sdk.mjs"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "0.132.1",
+    "esbuild": "0.25.10"
+  }
+}
