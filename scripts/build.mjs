@@ -18,7 +18,8 @@ const docs = lib.docs.filter((d) => all || d.public)
   .filter((d) => existsSync(path.join(root, 'content/docs', d.id + '.json')) || console.warn(`skip ${d.id}: content/docs/${d.id}.json not found`))
   .map(({ public: _p, ...d }) => d);
 const used = new Set(docs.map((d) => d.course));
-const folders = lib.folders.filter((f) => all || used.has(f.id));
+const folders = lib.folders.filter((f) => f.public || used.has(f.id) || (all && lib.docs.some((d) => d.course === f.id)))
+  .map(({ public: _p, ...f }) => f);
 const sched = all || lib.includeSchedule ? lib.schedule : null;
 
 await rm(out, { recursive: true, force: true });

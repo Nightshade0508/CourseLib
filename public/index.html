@@ -1452,7 +1452,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
   function firstDocId(){
     var fl=folderList();
     for(var i=0;i<fl.length;i++){ var l=docsIn(fl[i].id); if(l.length) return l[0].id; }
-    return BUILTIN_DOCS[0].id;
+    return BUILTIN_DOCS.length?BUILTIN_DOCS[0].id:'view:home';
   }
   function applyBuiltinHead(id){
     var p=document.getElementById('doc-'+id); if(!p) return;
@@ -3337,7 +3337,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
       delete pdfMem[d.id]; delete pdfJobs[d.id];
       if(pdfSubId===d.id) unwatchPdf();
       return db.doc('docs/'+d.id).delete();
-    }).then(function(){ if(current===d.id) show(BUILTIN_DOCS[0].id); });
+    }).then(function(){ if(current===d.id) show(firstDocId()); });
   }
   /* drag a PDF onto the sidebar */
   (function(){

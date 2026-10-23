@@ -1,7 +1,13 @@
 {
-  "_comment": "Built-in library. public:true docs are deployed to the public site; run `npm run build:all` to include every doc.",
+  "_comment": "Built-in library. The public site ships no readings, only folders marked public:true; docs need public:true AND a file in content/docs/ to be deployed. `npm run build:all` builds a personal library from whatever docs you keep locally.",
   "includeSchedule": false,
   "folders": [
+    {
+      "id": "mine",
+      "code": "我的读物",
+      "name": "上传和添加的文档",
+      "public": true
+    },
     {
       "id": "c104",
       "code": "Data C104",
@@ -33,14 +39,14 @@
       "title": "Wordsworth: Five Poems",
       "zh": "华兹华斯诗五首 · 逐行对照 · 逐句批注",
       "course": "r1b",
-      "public": true
+      "public": false
     },
     {
       "id": "stein",
       "title": "Tender Buttons (pp. 4–13)",
       "zh": "《柔软的纽扣》· OBJECTS 物件 · 逐段对照",
       "course": "r1b",
-      "public": true
+      "public": false
     },
     {
       "id": "scott",
@@ -82,7 +88,7 @@
       "title": "Micrographia (Selections)",
       "zh": "《显微图谱》节选 · 前言与三项观察",
       "course": "r1b",
-      "public": true
+      "public": false
     },
     {
       "id": "gross",
@@ -96,7 +102,7 @@
       "title": "The Journals of Gilbert White, 1774–1783",
       "zh": "吉尔伯特·怀特日记 · 英文原文（尚未翻译）",
       "course": "r1b",
-      "public": true
+      "public": false
     },
     {
       "id": "paterson",
@@ -145,14 +151,14 @@
       "title": "Marianne Moore: To a Snail",
       "zh": "玛丽安·摩尔《致蜗牛》· 逐行对照",
       "course": "r1b",
-      "public": true
+      "public": false
     },
     {
       "id": "octopus",
       "title": "Marianne Moore: An Octopus",
       "zh": "玛丽安·摩尔《一只章鱼》· 逐行对照",
       "course": "r1b",
-      "public": true
+      "public": false
     },
     {
       "id": "crawford",

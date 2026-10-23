@@ -3,11 +3,6 @@ dist/
 .DS_Store
 *.log
 
-# The repo is public: only public-domain readings are committed (see README).
-content/docs/*.json
-!content/docs/wordsworth.json
-!content/docs/stein.json
-!content/docs/micrographia.json
-!content/docs/white.json
-!content/docs/snail.json
-!content/docs/octopus.json
+
+# The repo is public: course readings are never committed (see README).
+content/docs/

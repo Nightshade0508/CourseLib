@@ -51,11 +51,11 @@ scripts/
 .github/workflows/deploy.yml   推送到 main 后自动部署到 GitHub Pages
 ```
 
-## 内置读物与版权
+## 内置读物
 
-这个仓库是公开的，所以 `content/docs/` 里**只放公版作品**（华兹华斯、Tender Buttons、Micrographia、Gilbert White 日记、Marianne Moore 两首）。课程里受版权保护的读物（Foucault、Kuhn、Scott 等）的对照译本不提交到这里，只在原来的 claude.ai Artifact 里保留。
+公开网站**不带任何示例读物**，只有一个空的「我的读物」文件夹，访客自己上传或粘贴文档。仓库里也不提交任何读物（`.gitignore` 忽略了 `content/docs/`），因为课程读物大多受版权保护。
 
-`content/library.json` 仍然列着所有读物，`"public": false` 的不会发布。想在本机生成包含全部读物的个人版：把那些读物的 JSON 放进 `content/docs/`（**不要提交**），然后 `npm run dev:all`。构建时找不到的读物会自动跳过。
+`content/library.json` 仍然保留原来的课程文件夹、读物清单和课表，供个人版使用：把读物的 JSON 放进本地的 `content/docs/`，然后 `npm run dev:all`。构建时找不到的读物会自动跳过。
 
 课表（`schedule`）默认不发布；把 `includeSchedule` 改成 `true` 可以在公开版首页显示课表。
 
@@ -77,7 +77,6 @@ OpenRouter 登录会回调到网站当前地址，部署在任何域名下都能
 
 ## 常见维护
 
-- **添加公开示例读物**（只限公版或你有权公开的文本）：把 `xxx.json` 放进 `content/docs/`，在 `content/library.json` 的 `docs` 里加一条并设 `"public": true`。
 - **修改默认模型**：`public/runtime/runtime.js` 顶部的 `PROVIDERS`。访客也可以在「AI 账号」里自己改。
 - **升级 Anthropic SDK**：改 `package.json` 里的版本，`npm install && npm run vendor:sdk`，提交生成的 `public/vendor/anthropic-sdk.mjs`。
 - **改界面或功能**：都在 `public/index.html`。页面通过 `window.claude.use('sample' | 'db' | 'downloads')` 使用 AI、存储和下载，具体实现在 `runtime.js`。

@@ -7,5 +7,5 @@ Static site, no framework or bundler. Originally a claude.ai Artifact.
   - `sample(prompt, {modelTier:'quick', signal, onText({text, delta}), images:[Blob]})` → `{text}`; `sample.json(...)`; `sample.limits()`. Errors are thrown as `{code, message}`; the codes are mapped to Chinese messages in `pdfErr` / `sampleErr` in index.html.
   - Providers: OpenRouter (OAuth PKCE), Anthropic API key (official SDK, bundled at `public/vendor/anthropic-sdk.mjs`), any OpenAI-compatible endpoint.
   - `db`: Firestore-like paths (`docs/<id>`, `pdf/<id>/chunks/<c>`) in IndexedDB, with `onSnapshot` and cross-tab sync. `update()` rejects on a missing doc on purpose.
-- Content: `content/library.json` + `content/docs/*.json`. `node scripts/build.mjs` writes `dist/` with only `"public": true` docs; `--all` includes everything. The repo is public: never commit copyrighted readings to `content/docs/` or mark them public.
+- Content: `content/library.json` + `content/docs/*.json`. `node scripts/build.mjs` writes `dist/` with only `"public": true` docs; `--all` includes everything. The public site ships no readings (only the empty "mine" folder); `content/docs/` is gitignored because the repo is public.
 - Test: `npm run dev`, then drive it with Playwright and mock `api.anthropic.com` / `openrouter.ai` with `page.route`.
