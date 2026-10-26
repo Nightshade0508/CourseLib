@@ -694,6 +694,117 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
 .docbody.vbody ul.n-list,.docbody.vbody ul.s-list,.docbody.vbody ul.vc-list,.docbody.vbody ul.v-list,.docbody.vbody ul.lec-r{margin-left:0;padding-left:0}
 .docbody p.sep{margin:44px 0;text-align:center;line-height:1}
 .docbody p.sep::before{content:"* * *";letter-spacing:.6em;color:var(--muted);font-family:var(--f-ui);font-size:14px}
+
+/* ---------- sidebar footer: one "new" button, account, more ---------- */
+.side{gap:20px;padding-bottom:0}
+.side-foot{position:sticky;bottom:0;margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:14px 2px 16px;background:linear-gradient(to bottom,transparent,var(--panel) 14px);z-index:2}
+.sf-row{display:flex;align-items:center;gap:6px}
+#acct{flex:1;min-width:0}
+.acct-chip{padding:8px 10px!important}
+.new-btn{display:flex;align-items:center;gap:10px;width:100%;height:40px;padding:0 12px;border:0;border-radius:11px;background:var(--ink);color:var(--bg);
+  font:500 13.5px var(--f-ui);cursor:pointer;transition:opacity .15s,transform .18s var(--ease)}
+.new-btn:hover{opacity:.9}.new-btn:active{transform:scale(.98)}
+.new-btn .ic{width:17px;height:17px}
+.new-btn span{flex:1;text-align:left}
+.new-btn kbd{background:transparent;border-color:color-mix(in srgb,var(--bg) 35%,transparent);color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.pop-item.wi{display:flex;align-items:center;gap:10px}
+.pop-item.wi .ic{width:16px;height:16px;color:var(--muted)}
+.pop-item .pk{margin-left:auto;padding-left:16px;font-size:11.5px;color:var(--muted)}
+.pop-sep{height:1px;margin:5px 6px;background:var(--rule-soft)}
+kbd{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border:1px solid var(--rule);border-radius:5px;background:var(--panel);
+  font:500 10.5px/1 var(--f-ui);color:var(--muted);font-variant-numeric:tabular-nums}
+.sbtn{width:100%;cursor:pointer;color:var(--muted);font:13px var(--f-ui);text-align:left}
+.sbtn span{flex:1}
+.sbtn:hover{border-color:var(--ink-2);color:var(--ink-2)}
+.v-sbox{max-width:420px;margin:0 0 22px}
+
+/* ---------- reading settings ---------- */
+:root{--read-zoom:1;--read-w:720px}
+.doc{max-width:var(--read-w)}
+.docbody{zoom:var(--read-zoom)}
+body.ff-sans .docbody{font-family:var(--f-ui)}
+body.ff-sans .docbody .zh,body.ff-sans .docbody p.zh,body.ff-sans .docbody td.zh,body.ff-sans .docbody .ap{font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",var(--f-ui)}
+body.lh-compact .docbody{line-height:1.56}
+body.lh-compact .docbody p.zh{line-height:1.78}
+body.lh-compact .docbody table.verse td{line-height:1.45}
+body.lh-relaxed .docbody{line-height:1.95}
+body.lh-relaxed .docbody p.zh{line-height:2.2}
+body.lh-relaxed .docbody table.verse td{line-height:1.85}
+.typo{position:fixed;z-index:60;top:calc(var(--bar-h) + env(safe-area-inset-top,0px) + 6px);right:20px;width:316px;padding:16px;display:flex;flex-direction:column;gap:12px;
+  background:var(--surface);border:1px solid var(--rule);border-radius:16px;box-shadow:var(--shadow);font-family:var(--f-ui);transform-origin:top right;animation:ty-in .22s var(--ease)}
+.typo.out{animation:ty-out .14s ease forwards}
+@keyframes ty-in{from{opacity:0;transform:translateY(-6px) scale(.97)}}
+@keyframes ty-out{to{opacity:0;transform:translateY(-4px) scale(.98)}}
+.ty-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ty-l{font-size:12.5px;color:var(--ink-2)}
+.ty-step{display:flex;align-items:center;gap:2px;padding:3px;border-radius:11px;background:var(--rule-soft)}
+.ty-step button{width:38px;height:28px;border:0;border-radius:8px;background:none;color:var(--ink-2);font:500 14px var(--f-read);cursor:pointer;transition:background .15s,color .15s,transform .15s var(--ease)}
+.ty-step button small{font:500 11px var(--f-ui);margin-left:1px}
+.ty-step button:hover{background:var(--surface);color:var(--ink)}
+.ty-step button:active{transform:scale(.92)}
+.ty-step button:disabled{opacity:.35;pointer-events:none}
+#ty-fs{min-width:48px;text-align:center;font-size:12.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ty-foot{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--rule-soft)}
+.ty-focus{flex:1;display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border:1px solid var(--rule);border-radius:10px;background:none;color:var(--ink-2);font:13px var(--f-ui);cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+.ty-focus span{flex:1;text-align:left}
+.ty-focus:hover{border-color:var(--ink-2);color:var(--ink)}
+.ty-focus .ic{width:16px;height:16px}
+.ty-reset{border:0;background:none;font:12.5px var(--f-ui);color:var(--muted);cursor:pointer;padding:6px}
+.ty-reset:hover{color:var(--ink)}
+#typoopen[aria-expanded="true"]{background:var(--accent-soft);color:var(--accent)}
+@media (max-width:560px){.typo{left:8px;right:8px;width:auto}}
+
+/* ---------- focus mode ---------- */
+@media (min-width:901px){
+  body.focus .shell,body.focus .shell.side-closed{grid-template-columns:0 minmax(0,1fr)}
+  body.focus .side{visibility:hidden;transform:translateX(-100%);transition:transform .36s var(--ease),visibility 0s .36s}
+}
+body.focus .toc{display:none!important}
+body.focus #tocopen{display:none!important}
+body.focus .reading{grid-template-columns:minmax(0,1fr)}
+body.focus .toolbar{opacity:0;transition:opacity .35s var(--ease)}
+body.focus .toolbar:hover,body.focus .toolbar:focus-within{opacity:1}
+body.focus .player{left:50%}
+
+/* ---------- command palette ---------- */
+.cmdk-root{position:fixed;inset:0;z-index:110;display:flex;align-items:flex-start;justify-content:center;padding:13vh 16px 16px;background:var(--scrim);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fade-in .16s ease}
+.cmdk-root.closing{animation:fade-out .14s ease forwards}
+.cmdk{width:min(640px,100%);max-height:min(580px,74vh);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border:1px solid var(--rule);
+  border-radius:18px;box-shadow:var(--shadow);font-family:var(--f-ui);animation:dlg-in .26s var(--ease)}
+.cmdk-root.closing .cmdk{animation:dlg-out .14s ease forwards}
+.cmdk-in{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--rule-soft);color:var(--muted)}
+.cmdk-in .ic{width:18px;height:18px}
+.cmdk-in input{flex:1;min-width:0;border:0;outline:0;background:none;font:16px var(--f-ui);color:var(--ink)}
+.cmdk-in input::placeholder{color:var(--muted)}
+.cmdk-list{flex:1;overflow-y:auto;padding:6px 8px 8px;overscroll-behavior:contain;scroll-padding:8px}
+.cmdk-g{padding:12px 10px 5px;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cmdk-it{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:42px;padding:8px 10px;border:0;border-radius:10px;background:none;
+  text-align:left;cursor:pointer;color:var(--ink-2);font:13.5px var(--f-ui);transition:background-color .12s ease,color .12s ease}
+.cmdk-it.on{background:var(--rule-soft);color:var(--ink)}
+.cmdk-it.on::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:2px;background:var(--accent)}
+.cmdk-it .ic{width:16px;height:16px;flex:none;color:var(--muted)}
+.cmdk-it.on .ic{color:var(--ink)}
+.cmdk-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.cmdk-t b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmdk-t span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmdk-t mark{background:none;color:var(--accent);font-weight:600}
+.cmdk-r{flex:none;font-size:11.5px;color:var(--muted)}
+.cmdk-none{padding:28px 12px;text-align:center;font-size:13px;color:var(--muted)}
+.cmdk-foot{display:flex;align-items:center;gap:16px;padding:9px 16px;border-top:1px solid var(--rule-soft);font-size:11.5px;color:var(--muted)}
+.cmdk-foot span{display:inline-flex;align-items:center;gap:5px}
+@media (max-width:560px){.cmdk-root{padding-top:8px}.cmdk{max-height:80vh}.cmdk-foot{display:none}}
+
+.info-body{font-family:var(--f-ui);font-size:13.5px;line-height:1.7;color:var(--ink-2)}
+.info-body p{margin:0 0 10px}
+dl.keys{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;margin:0;align-items:center}
+dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
+/* ---------- translation estimate ---------- */
+.ps-est{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:10px 0 0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.ps-est b{font-weight:600;color:var(--ink)}
+.ps-est .lnk{border:0;background:none;padding:0;font:inherit;color:var(--ink-2);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:.25em;cursor:pointer}
+.ps-est .lnk:hover{color:var(--ink);text-decoration-color:var(--ink-2)}
+.ps-est .dim{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -727,6 +838,12 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
 <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.5 2.5a7.5 7.5 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-.9a7.5 7.5 0 0 0 2.6 1.5l.5 2.5h4l.5-2.5a7.5 7.5 0 0 0 2.6-1.5l2.3.9 2-3.4z"/></symbol>
 <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4.5v10M7.5 10.5l4.5 4.5 4.5-4.5M5 19.5h14"/></symbol>
 <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.5h9l1-12.5M10 11v5.5M14 11v5.5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-type" viewBox="0 0 24 24"><path d="M4 18.5 8.5 6h1L14 18.5M5.6 14h6.8"/><path d="M15.5 11.2c.6-.9 1.5-1.4 2.6-1.4 1.6 0 2.5.9 2.5 2.5v6.2M20.6 14.6c-3.6 0-5.4.9-5.4 2.3 0 1 .8 1.7 2 1.7 1.8 0 3.4-1.4 3.4-3.6"/></symbol>
+<symbol id="i-focus" viewBox="0 0 24 24"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/></symbol>
+<symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 5.5h16v4H4zM5.5 9.5v9h13v-9M10 13h4"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="3.5"/><path d="M10.5 12.5 19 4M16 7l2.5 2.5M14 9l2 2"/></symbol>
+<symbol id="i-lang" viewBox="0 0 24 24"><path d="M4 6h9M8.5 4v2M6 6c.8 3.4 3 6 6 7.5M11 6c-.8 3.6-3.2 6.6-7 8.5"/><path d="M13 20l3.5-8 3.5 8M14.2 17.3h4.6"/></symbol>
 <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.5c-1.8-1.3-4.3-2-7.5-2v13c3.2 0 5.7.7 7.5 2 1.8-1.3 4.3-2 7.5-2v-13c-3.2 0-5.7.7-7.5 2z"/><path d="M12 6.5v13"/></symbol>
 </svg>
 <div class="shell" id="shell">
@@ -739,11 +856,12 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
       <button class="icon-btn" id="sideclose" type="button" title="收起侧栏" aria-label="收起侧栏"><svg class="ic" aria-hidden="true"><use href="#i-sidebar"></use></svg></button>
     </div>
     <div id="nav"></div>
-    <div id="acct"></div>
-    <div class="about">
-      <p>上传 PDF / Word 或粘贴文章，自动生成逐段中英对照译本，并支持标注、生词本、学习卡片与本地朗读。</p>
-      <p>你的文档、标注和生词只保存在这台设备的浏览器里；翻译等 AI 功能使用你自己登录的 AI 账号。</p>
-      <p>高品质朗读使用开源模型 Kokoro-82M v1.1（Apache-2.0），中英文都在你的浏览器里本地生成。</p>
+    <div class="side-foot">
+      <button class="new-btn" id="newbtn" type="button"><svg class="ic" aria-hidden="true"><use href="#i-plus"></use></svg><span>新建</span><kbd class="nb-k">N</kbd></button>
+      <div class="sf-row">
+        <div id="acct"></div>
+        <button class="icon-btn" id="moremenu" type="button" title="更多" aria-label="更多"><svg class="ic" aria-hidden="true"><use href="#i-more"></use></svg></button>
+      </div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -758,16 +876,24 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
           <button type="button" data-lang="en" title="仅英文">EN</button>
           <button type="button" data-lang="zh" title="仅中文">中</button>
         </div>
-        <span class="tb-sep" aria-hidden="true"></span>
-        <div class="seg icons" id="themeseg" role="group" aria-label="明暗主题">
+        <button class="icon-btn" id="typoopen" type="button" title="阅读设置" aria-label="阅读设置" aria-expanded="false" aria-controls="typo"><svg class="ic" aria-hidden="true"><use href="#i-type"></use></svg></button>
+        <button class="icon-btn" id="ttsopen" type="button" title="听书" aria-label="听书"><svg class="ic" aria-hidden="true"><use href="#i-headphones"></use></svg></button>
+        <button class="icon-btn" id="vpopen" type="button" title="语音包管理" aria-label="语音包管理" hidden><svg class="ic" aria-hidden="true"><use href="#i-gear"></use></svg></button>
+        <button class="icon-btn" id="cmdkopen" type="button" title="搜索与命令（⌘K）" aria-label="搜索与命令"><svg class="ic" aria-hidden="true"><use href="#i-search"></use></svg></button>
+        <button class="icon-btn" id="tocopen" type="button" title="显示目录" aria-label="显示目录" hidden><svg class="ic" aria-hidden="true"><use href="#i-toc"></use></svg></button>
+      </div>
+    </div>
+    <div class="typo" id="typo" hidden role="dialog" aria-label="阅读设置">
+      <div class="ty-row"><span class="ty-l">主题</span><div class="seg icons" id="themeseg" role="group" aria-label="明暗主题">
           <button type="button" data-theme="system" title="跟随系统" aria-label="跟随系统"><svg class="ic" aria-hidden="true"><use href="#i-auto"></use></svg></button>
           <button type="button" data-theme="light" title="明亮" aria-label="明亮"><svg class="ic" aria-hidden="true"><use href="#i-sun"></use></svg></button>
           <button type="button" data-theme="dark" title="暗色" aria-label="暗色"><svg class="ic" aria-hidden="true"><use href="#i-moon"></use></svg></button>
-        </div>
-        <button class="icon-btn" id="ttsopen" type="button" title="听书" aria-label="听书"><svg class="ic" aria-hidden="true"><use href="#i-headphones"></use></svg></button>
-        <button class="icon-btn" id="vpopen" type="button" title="语音包管理" aria-label="语音包管理"><svg class="ic" aria-hidden="true"><use href="#i-gear"></use></svg></button>
-        <button class="icon-btn" id="tocopen" type="button" title="显示目录" aria-label="显示目录" hidden><svg class="ic" aria-hidden="true"><use href="#i-toc"></use></svg></button>
-      </div>
+        </div></div>
+      <div class="ty-row"><span class="ty-l">字号</span><div class="ty-step"><button type="button" data-fs="-1" aria-label="缩小字号">A<small>−</small></button><span id="ty-fs">100%</span><button type="button" data-fs="1" aria-label="放大字号">A<small>+</small></button></div></div>
+      <div class="ty-row"><span class="ty-l">行距</span><div class="seg" id="ty-lh" role="group" aria-label="行距"><button type="button" data-v="compact">紧凑</button><button type="button" data-v="normal">标准</button><button type="button" data-v="relaxed">宽松</button></div></div>
+      <div class="ty-row"><span class="ty-l">栏宽</span><div class="seg" id="ty-w" role="group" aria-label="栏宽"><button type="button" data-v="narrow">窄</button><button type="button" data-v="normal">标准</button><button type="button" data-v="wide">宽</button></div></div>
+      <div class="ty-row"><span class="ty-l">字体</span><div class="seg" id="ty-ff" role="group" aria-label="字体"><button type="button" data-v="serif">衬线</button><button type="button" data-v="sans">无衬线</button></div></div>
+      <div class="ty-foot"><button type="button" class="ty-focus" id="ty-focus"><svg class="ic" aria-hidden="true"><use href="#i-focus"></use></svg><span>专注模式</span><kbd>F</kbd></button><button type="button" class="ty-reset" id="ty-reset">恢复默认</button></div>
     </div>
     <div class="reading">
       <div class="docwrap">
@@ -830,6 +956,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
 <script src="runtime/runtime.js"></script>
 <script>(function(){
   var K='ptl:';
+  var MAC=/Mac|iPhone|iPad|iPod/.test(navigator.platform||navigator.userAgent);
   var SVGNS='http://www.w3.org/2000/svg';
   function icon(n){var v=document.createElementNS(SVGNS,'svg');v.setAttribute('class','ic');v.setAttribute('aria-hidden','true');
     var u=document.createElementNS(SVGNS,'use');u.setAttribute('href','#i-'+n);v.appendChild(u);return v;}
@@ -1064,18 +1191,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
       if(db) dndFolder(sec,f.id);
       navRoot.appendChild(sec);
     });
-    if(db){
-      var act=el('div','side-actions');
-      var f0=el('button','ghost-btn prime'); f0.appendChild(icon('upload')); f0.appendChild(el('span','','上传 PDF / Word（自动翻译）')); f0.type='button';
-      f0.addEventListener('click',function(){uploadPdf();});
-      act.appendChild(f0);
-      var f1=el('button','ghost-btn'); f1.appendChild(icon('folder-plus')); f1.appendChild(el('span','','新建文件夹')); f1.type='button';
-      f1.addEventListener('click',newFolder);
-      var f2=el('button','ghost-btn'); f2.appendChild(icon('file-plus')); f2.appendChild(el('span','','添加文档')); f2.type='button';
-      f2.addEventListener('click',function(){newDoc();});
-      act.appendChild(f1); act.appendChild(f2);
-      navRoot.appendChild(act);
-    }else{
+    if(!db){
       var n=el('p','side-note','浏览器禁用了本地存储，编辑功能不可用。');
       navRoot.appendChild(n);
     }
@@ -1257,15 +1373,20 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
     closePop();
     pop=el('div','pop');
     items.forEach(function(it){
-      var b=el('button','pop-item',it.label); b.type='button';
+      if(it.sep){ pop.appendChild(el('div','pop-sep')); return; }
+      var b=el('button','pop-item'+(it.icon?' wi':''),it.icon?null:it.label); b.type='button';
+      if(it.icon){ b.appendChild(icon(it.icon)); b.appendChild(el('span','',it.label)); }
+      if(it.key) b.appendChild(el('span','pk',it.key));
       if(it.danger) b.classList.add('danger');
       b.addEventListener('click',function(e){e.stopPropagation();closePop();it.run();});
       pop.appendChild(b);
     });
     document.body.appendChild(pop);
-    var r=anchor.getBoundingClientRect();
-    pop.style.top=(r.bottom+window.scrollY+4)+'px';
-    pop.style.left=Math.max(8,Math.min(r.left+window.scrollX, window.innerWidth-190))+'px';
+    var r=anchor.getBoundingClientRect(), h=pop.offsetHeight, w=pop.offsetWidth;
+    var up=r.bottom+4+h>window.innerHeight && r.top-4-h>0;
+    if(up) pop.style.transformOrigin='bottom left';
+    pop.style.top=((up?r.top-4-h:r.bottom+4)+window.scrollY)+'px';
+    pop.style.left=Math.max(8,Math.min(r.left+window.scrollX, window.innerWidth-w-8))+'px';
     pop.addEventListener('click',function(e){e.stopPropagation();});
   }
 
@@ -3050,7 +3171,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
       });
     }).then(function(){
       job.running=false;
-      runTranslate(id);
+      readyToTranslate(id,false);
     }).catch(function(e){
       job.running=false;
       var msg=pdfErr(e);
@@ -3076,7 +3197,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
   }
   function nameDoc(id,data,fname,pm){
     return getSample().then(function(s){
-      if(!s) return;
+      if(!s||!(window.PTL&&PTL.account())) return;
       var txt='', n=0;
       data.items.forEach(function(it){ if(it.k!=='pg' && txt.length<3500){ txt+=(txt?'\n\n':'')+it.en; } });
       var prompt='A university student uploaded a PDF reading to a bilingual (English–Chinese) study library. Give it a library entry.\n'+
@@ -3088,7 +3209,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
       return s.json(prompt,{modelTier:'quick'}).then(function(o){
         var cur=userDocs[id]||{};
         if(cur.renamed||!o||typeof o.title!=='string'||!o.title.trim()) return;
-        return metaUpdate(id,{title:o.title.trim().slice(0,120),zh:String(o.zh||'').trim().slice(0,60),author:String(o.author||'').trim().slice(0,120)});
+        return metaUpdate(id,{named:true,title:o.title.trim().slice(0,120),zh:String(o.zh||'').trim().slice(0,60),author:String(o.author||'').trim().slice(0,120)});
       }).catch(function(e){ if(e&&(e.code==='not_granted'||e.code==='sampling_disabled')) throw e; });
     });
   }
@@ -3245,20 +3366,21 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
       ocr:'扫描版：正在让 AI 识别文字'+(I.ls.ocr?' · 第 '+I.ls.ocr+' 页':''),
       naming:'正在根据内容生成标题…',
       translating:(I.remote?'正在另一个窗口中翻译':'正在翻译')+' · '+I.done+' / '+I.n+' 段',
-      paused:'翻译已暂停 · '+I.done+' / '+I.n+' 段',
+      paused:I.done?'翻译已暂停 · '+I.done+' / '+I.n+' 段':'准备翻译 · 共 '+I.n+' 段',
       error:'处理失败',
       done:''}[I.st];
     if(I.st==='done'||!I.st){ box.hidden=true; box.innerHTML=''; return; }
     box.hidden=false;
     html='<div class="ps-row"><span class="ps-dot'+((I.st==='paused'||I.st==='error')?' idle':'')+'"></span><span class="ps-t">'+esc(label||'')+'</span><span class="ps-act"></span></div>';
-    if(I.st==='translating'||I.st==='paused') html+='<div class="vp-bar ps-bar"><span style="width:'+p+'%"></span></div>';
+    if(I.st==='translating'||(I.st==='paused'&&I.done)) html+='<div class="vp-bar ps-bar"><span style="width:'+p+'%"></span></div>';
     if(I.err && (I.st==='paused'||I.st==='error')) html+='<p class="ps-err">'+esc(I.err)+'</p>';
     box.innerHTML=html;
     var act=box.querySelector('.ps-act');
     if(I.st==='translating' && !I.remote){
       var b=el('button','btn ghost sm','暂停'); b.type='button'; b.addEventListener('click',function(){ stopTranslate(id); }); act.appendChild(b);
     }else if(I.st==='paused' && I.n){
-      var c=el('button','btn primary sm','继续翻译'); c.type='button'; c.addEventListener('click',function(){ runTranslate(id); }); act.appendChild(c);
+      var c=el('button','btn primary sm',I.done?'继续翻译':'开始翻译'); c.type='button'; c.addEventListener('click',function(){ startTranslate(id); }); act.appendChild(c);
+      if(I.done<I.n) renderEstimate(id,box);
     }
   }
   function renderPdfPane(d,id,pane,fo){
@@ -3312,7 +3434,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
   function pdfNavLabel(d){
     if(d.format!=='pdf'||d.status==='done') return d.zh||'';
     var p=d.n?Math.round((d.done||0)/d.n*100):0;
-    var s={reading:'读取中…',ocr:'识别扫描页…',naming:'生成标题…',translating:'翻译中 '+p+'%',paused:'已暂停 · '+p+'%',error:'处理失败'}[d.status]||'';
+    var s={reading:'读取中…',ocr:'识别扫描页…',naming:'生成标题…',translating:'翻译中 '+p+'%',paused:d.done?'已暂停 · '+p+'%':'待翻译',error:'处理失败'}[d.status]||'';
     return (d.zh?d.zh+' · ':'')+s;
   }
   function renamePdf(d){
@@ -3950,7 +4072,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
     h+='<h2>Getting started<span class="zh">三步开始</span></h2><ol class="v-steps">'+
       '<li><b>登录 AI 账号</b>：'+(acct?'已登录 '+esc(acct.label)+'。':'翻译、查词、学习卡片等功能会使用你自己的 AI 账号，费用直接从账号里扣。')+
         ' <button type="button" class="btn ghost sm" data-acct>'+(acct?'账号设置':'登录')+'</button></li>'+
-      '<li><b>添加文档</b>：在侧栏点「上传 PDF」或「添加文档」，PDF、Word 和粘贴的文本都可以。</li>'+
+      '<li><b>添加文档</b>：点侧栏底部的「新建」（或按 <kbd>N</kbd>），上传 PDF、Word，或者粘贴文章。</li>'+
       '<li><b>阅读</b>：译好的段落会先显示；选中文字可以高亮、查词、让 AI 解释，耳机按钮可以本地朗读。</li></ol>';
     var rec=Object.keys(progress).filter(docExists).sort(function(a,b){ return (progress[b].at||0)-(progress[a].at||0); }).slice(0,6);
     if(rec.length){
@@ -3962,7 +4084,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
     if(samples.length){
       h+='<h2>Sample texts<span class="zh">示例读物</span></h2><ul class="v-list">'+samples.map(function(d){ var m=docMeta(d.id); return '<li><button type="button" class="v-doc" data-open="'+esc(d.id)+'"><span class="v-t">'+esc(m.title)+'</span>'+progBar(d.id)+'</button></li>'; }).join('')+'</ul>';
     }
-    h+='<p class="v-src">文档、标注和生词保存在这台设备的浏览器里，换设备或清除浏览器数据后不会保留。</p></div>';
+    h+='<p class="v-src">文档、标注和生词保存在这台设备的浏览器里，换设备或清除浏览器数据后不会保留，建议定期在侧栏「⋯ → 导出备份」。按 <kbd>'+(MAC?'⌘':'Ctrl')+'</kbd> <kbd>K</kbd> 可以随时搜索和执行命令。</p></div>';
     pane.innerHTML=h;
     wireViewLinks(pane);
     var ab=pane.querySelector('[data-acct]'); if(ab) ab.addEventListener('click',function(){ PTL.openAccount(); });
@@ -4157,8 +4279,10 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
   }
   function invalidateIndex(){ sIndex=null; leafCache={}; }
   function viewSearch(pane){
-    pane.innerHTML=vHead('搜索','“'+searchQ+'”')+'<div class="docbody vbody"><p class="side-note" id="s-st">正在建立索引…</p></div>';
-    var q=searchQ.trim(); if(!q){ pane.querySelector('.vbody').innerHTML='<p class="v-empty">在左上角输入关键词，中英文都可以。</p>'; return; }
+    pane.innerHTML=vHead('搜索',searchQ?'“'+searchQ+'”':'全部读物 · 中英文')+'<div class="sbox v-sbox"><svg class="ic"><use href="#i-search"></use></svg><input type="search" id="vsq" placeholder="输入关键词，中英文都可以" autocomplete="off"></div><div class="docbody vbody"><p class="side-note" id="s-st">正在建立索引…</p></div>';
+    var vin=pane.querySelector('#vsq'), vt=0; vin.value=searchQ;
+    vin.addEventListener('input',function(){ clearTimeout(vt); vt=setTimeout(function(){ searchQ=vin.value; keepScrollOnce=true; show('view:search'); var n=document.getElementById('vsq'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } },350); });
+    var q=searchQ.trim(); if(!q){ pane.querySelector('.vbody').innerHTML='<p class="v-empty">输入关键词搜索全部读物，中英文都可以。</p>'; vin.focus(); return; }
     buildIndex(function(a,b){ var st=pane.querySelector('#s-st'); if(st) st.textContent='正在建立索引 '+a+' / '+b+'…'; }).then(function(idx){
       if(current!=='view:search'||searchQ.trim()!==q) return;
       var terms=q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -4200,14 +4324,13 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
   /* sidebar shortcuts + search box (rendered at top of the nav) */
   function navTools(){
     var wrap=el('div','nav-tools');
-    var sb=el('div','sbox');
-    sb.innerHTML='<svg class="ic"><use href="#i-search"></use></svg><input type="search" id="sq" placeholder="搜索全部读物（中英文）" autocomplete="off">';
-    var inp=sb.querySelector('input'); inp.value=searchQ;
-    var tmr=0;
-    inp.addEventListener('input',function(){ clearTimeout(tmr); tmr=setTimeout(function(){ searchQ=inp.value; if(searchQ.trim().length>=2){ if(current==='view:search'){ keepScrollOnce=true; show('view:search'); } else show('view:search'); var i2=document.getElementById('sq'); if(i2){ i2.focus(); i2.setSelectionRange(i2.value.length,i2.value.length); } } },350); });
-    inp.addEventListener('focus',function(){ if(!sIndex) buildIndex(); });
-    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ searchQ=inp.value; show('view:search'); } });
+    var sb=el('button','sbox sbtn'); sb.type='button';
+    sb.innerHTML='<svg class="ic"><use href="#i-search"></use></svg><span>搜索或跳转…</span><kbd>'+(MAC?'⌘':'Ctrl ')+'K</kbd>';
+    sb.addEventListener('click',function(){ openCmdk(); });
     wrap.appendChild(sb);
+    return navToolItems(wrap);
+  }
+  function navToolItems(wrap){
     var due=Object.keys(vocab).filter(function(k){ return (vocab[k].due||0)<=Date.now(); }).length;
     var nm=Object.keys(marks).filter(function(k){ return marks[k]&&marks[k].d; }).length;
     [['view:home','home',SCHED.lectures.length?'本周':'首页',''],['view:notes','note','我的标注',nm?String(nm):''],['view:vocab','book','生词本',due?due+' 到期':(Object.keys(vocab).length?String(Object.keys(vocab).length):'')]].forEach(function(x){
@@ -4396,7 +4519,7 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
         if(current===id){ keepScrollOnce=true; show(id); }
         return extra&&extra.renamed?null:nameDoc(id,data,name,{title:'',author:''});
       });
-    }).then(function(){ job.running=false; runTranslate(id); }).catch(function(e){
+    }).then(function(){ job.running=false; readyToTranslate(id,kind==='paste'); }).catch(function(e){
       job.running=false; setStat(id,{status:'paused'});
       metaUpdate(id,{status:pdfMem[id]?'paused':'error',err:pdfErr(e)});
     });
@@ -4409,11 +4532,346 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
     if(userDocs[id]&&userDocs[id].format==='pdf') paraTools(pane,id);
     setTimeout(trackProgress,400);
   }
+  /* ---------------- translation estimate ---------------- */
+  // rough token model: ~4 English characters per token in, ~0.5 Chinese token per source character out,
+  // plus the instructions and JSON wrapped around every batch
+  function trSize(id){
+    var data=pdfMem[id]; if(!data) return null;
+    var chars=0, n=0;
+    data.items.forEach(function(it){ if(needsZh(it)){ chars+=it.en.length; n++; } });
+    if(!n) return null;
+    var batches=Math.max(1,Math.ceil(chars/4200));
+    return {words:Math.round(chars/5.8),inTok:Math.round(chars/4+n*12+batches*900),outTok:Math.round(chars*0.5+n*14+batches*80)};
+  }
+  function fmtWords(n){ return n>=10000?(n/10000).toFixed(n>=100000?0:1)+' 万词':n+' 词'; }
+  function fmtUsd(v){ return v<0.01?'不到 $0.01':'$'+v.toFixed(v<10?2:1); }
+  function fmtTokens(n){ return n>=10000?(n/10000).toFixed(1)+' 万 tokens':n+' tokens'; }
+  function renderEstimate(id,box){
+    var z=trSize(id); if(!z) return;
+    var p=el('p','ps-est'); box.appendChild(p);
+    var lead='<span>'+((userDocs[id]||{}).done?'剩余约 ':'约 ')+fmtWords(z.words)+'</span>';
+    if(!(window.PTL&&PTL.account())){ p.innerHTML=lead+'<span class="dim">登录 AI 账号后显示预估费用</span>'; return; }
+    p.innerHTML=lead+'<span class="dim">正在估算费用…</span>';
+    var tier=(userDocs[id]||{}).tier==='quick'?'quick':'default', alt=tier==='quick'?'default':'quick';
+    var q={inTokens:z.inTok,outTokens:z.outTok};
+    Promise.all([PTL.estimate(Object.assign({tier:tier},q)),PTL.estimate(Object.assign({tier:alt},q))]).then(function(r){
+      var a=r[0], b=r[1]; if(!a||!p.isConnected) return;
+      var h=lead+'<span>预计 <b>'+(a.usd!=null?fmtUsd(a.usd):fmtTokens(a.tokens))+'</b> · '+esc(String(a.model).replace(/^[^\/]+\//,''))+'</span>';
+      if(b&&b.model!==a.model) h+='<button type="button" class="lnk">'+(alt==='quick'?'改用快速模式':'改用标准模式')+(b.usd!=null?'（'+(b.usd<0.01?'':'约 ')+fmtUsd(b.usd)+'）':'')+'</button>';
+      if(a.usd==null) h+='<span class="dim">这个服务没有公开价格，只能估算 tokens</span>';
+      p.innerHTML=h;
+      var l=p.querySelector('.lnk');
+      if(l) l.addEventListener('click',function(){ if(userDocs[id]) userDocs[id].tier=alt; updatePdfStat(id); metaUpdate(id,{tier:alt}); });
+    }).catch(function(){ if(p.isConnected) p.innerHTML=lead; });
+  }
+  // a new document waits for the reader to see its estimate; small pasted texts start straight away
+  var AUTO_START_USD=0.05;
+  function readyToTranslate(id,autoIfCheap){
+    var z=trSize(id), acc=window.PTL&&PTL.account();
+    function hold(){ if(userDocs[id]) userDocs[id].status='paused'; setStat(id,{status:'paused'}); metaUpdate(id,{status:'paused',err:''}); }
+    if(!z){ runTranslate(id); return; }
+    if(autoIfCheap&&acc){
+      PTL.estimate({inTokens:z.inTok,outTokens:z.outTok,tier:(userDocs[id]||{}).tier}).then(function(e){
+        if(e&&(e.usd!=null?e.usd<=AUTO_START_USD:z.words<=1500)) runTranslate(id); else hold();
+      },hold);
+      return;
+    }
+    hold();
+  }
+  function startTranslate(id){
+    var d=userDocs[id]||{}, data=pdfMem[id];
+    if(!(window.PTL&&PTL.account())){ PTL.openAccount(); return; }
+    // documents added before signing in get their AI title now
+    if(!d.named&&!d.renamed&&!d.done&&data){ nameDoc(id,data,(d.src&&d.src.name)||d.title||'',{title:'',author:''}).catch(noop).then(function(){ runTranslate(id); }); return; }
+    runTranslate(id);
+  }
+
+  /* ---------------- reading settings ---------------- */
+  var FS=[0.85,0.92,1,1.08,1.16,1.25,1.36], WIDTHS={narrow:'620px',normal:'720px',wide:'860px'};
+  var TYPO0={fs:2,lh:'normal',w:'normal',ff:'serif'}, typo=Object.assign({},TYPO0);
+  try{ var _ty=JSON.parse(lsGet('typo','null')); if(_ty) Object.keys(TYPO0).forEach(function(k){ if(_ty[k]!=null) typo[k]=_ty[k]; }); }catch(e){}
+  var typoBox=document.getElementById('typo'), typoBtn=document.getElementById('typoopen');
+  // keep the paragraph at the top of the screen in place while the layout changes
+  function keepPlace(fn){
+    var pane=curPane(), anchor=null, top=0;
+    if(pane&&!/^view:/.test(current)){
+      var c=pane.querySelectorAll('.docbody .pair,.docbody .unit,.docbody h2,.docbody .entry,.docbody p');
+      for(var i=0;i<c.length;i++){ var r=c[i].getBoundingClientRect(); if(r.bottom>80){ anchor=c[i]; top=r.top; break; } }
+    }
+    fn();
+    if(anchor) window.scrollBy(0,anchor.getBoundingClientRect().top-top);
+  }
+  function applyTypo(save){
+    typo.fs=Math.max(0,Math.min(FS.length-1,Math.round(+typo.fs)));
+    if(isNaN(typo.fs)) typo.fs=2;
+    var st=document.documentElement.style, b=document.body;
+    st.setProperty('--read-zoom',FS[typo.fs]); st.setProperty('--read-w',WIDTHS[typo.w]||WIDTHS.normal);
+    b.classList.toggle('lh-compact',typo.lh==='compact'); b.classList.toggle('lh-relaxed',typo.lh==='relaxed');
+    b.classList.toggle('ff-sans',typo.ff==='sans');
+    document.getElementById('ty-fs').textContent=Math.round(FS[typo.fs]*100)+'%';
+    typoBox.querySelector('[data-fs="-1"]').disabled=typo.fs===0;
+    typoBox.querySelector('[data-fs="1"]').disabled=typo.fs===FS.length-1;
+    [['ty-lh','lh'],['ty-w','w'],['ty-ff','ff']].forEach(function(x){
+      [].slice.call(document.querySelectorAll('#'+x[0]+' button')).forEach(function(bt){ bt.classList.toggle('on',bt.dataset.v===typo[x[1]]); });
+    });
+    if(save) lsSet('typo',JSON.stringify(typo));
+  }
+  function setTypo(k,v){ keepPlace(function(){ typo[k]=v; applyTypo(true); }); }
+  [].slice.call(typoBox.querySelectorAll('[data-fs]')).forEach(function(bt){ bt.addEventListener('click',function(){ setTypo('fs',typo.fs+(+bt.dataset.fs)); }); });
+  [['ty-lh','lh'],['ty-w','w'],['ty-ff','ff']].forEach(function(x){
+    [].slice.call(document.querySelectorAll('#'+x[0]+' button')).forEach(function(bt){ bt.addEventListener('click',function(){ setTypo(x[1],bt.dataset.v); }); });
+  });
+  document.getElementById('ty-reset').addEventListener('click',function(){ keepPlace(function(){ typo=Object.assign({},TYPO0); applyTypo(true); }); });
+  document.getElementById('ty-focus').addEventListener('click',function(){ setFocus(true); });
+  function openTypo(){
+    if(!typoBox.hidden) return;
+    typoBox.classList.remove('out'); typoBox.hidden=false; typoBtn.setAttribute('aria-expanded','true');
+    resyncSegs();
+  }
+  function closeTypo(){
+    if(typoBox.hidden||typoBox.classList.contains('out')) return;
+    typoBtn.setAttribute('aria-expanded','false');
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){ typoBox.hidden=true; return; }
+    typoBox.classList.add('out');
+    setTimeout(function(){ if(typoBox.classList.contains('out')){ typoBox.hidden=true; typoBox.classList.remove('out'); } },150);
+  }
+  typoBtn.addEventListener('click',function(e){ e.stopPropagation(); if(typoBox.hidden||typoBox.classList.contains('out')) openTypo(); else closeTypo(); });
+  document.addEventListener('mousedown',function(e){ if(!typoBox.hidden&&!typoBox.contains(e.target)&&!typoBtn.contains(e.target)) closeTypo(); });
+  applyTypo(false);
+
+  /* ---------------- focus mode ---------------- */
+  function inFocus(){ return document.body.classList.contains('focus'); }
+  function setFocus(on){
+    if(on===inFocus()) return;
+    keepPlace(function(){ document.body.classList.toggle('focus',on); });
+    if(on){ closeTypo(); toast('专注模式 · 按 F 或 Esc 退出'); }
+  }
+
+  /* ---------------- backup ---------------- */
+  function sinceText(ms){
+    var d=Math.floor((Date.now()-ms)/864e5);
+    return d<1?'今天':d===1?'昨天':d+' 天前';
+  }
+  function lastBackup(){ var t=+lsGet('lastBackup','0'); return t?'上次备份：'+sinceText(t):'还没有备份过'; }
+  function exportBackup(){
+    PTL.exportAll().then(function(b){
+      lsSet('lastBackup',String(Date.now()));
+      saveFile('parallel-text-library-'+todayISO()+'.json',new Blob([JSON.stringify(b)],{type:'application/json'}));
+    }).catch(function(e){ alertBox('导出失败：'+((e&&e.message)||e)); });
+  }
+  function importBackup(){
+    var file=null, armed=false;
+    modal('从备份恢复',[
+      {name:'file',label:'备份文件（.json）',type:'file',accept:'.json,application/json',
+       after:function(i){ i.addEventListener('change',function(){ file=i.files&&i.files[0]||null; armed=false; }); }},
+      {name:'mode',label:'恢复方式',type:'select',options:[
+        {value:'merge',label:'合并：保留这台设备上的内容，同一文档以备份为准'},
+        {value:'replace',label:'替换：先清空这台设备上的全部内容'}],
+       after:function(i){ i.addEventListener('change',function(){ armed=false; }); }}
+    ],function(v){
+      if(!file) return {error:'请先选择备份文件。'};
+      if(v.mode==='replace'&&!armed){ armed=true; return {error:'替换会删除这台设备上现有的全部文档、标注和生词。确定的话再点一次「恢复」。'}; }
+      return file.text().then(function(t){
+        var b; try{ b=JSON.parse(t); }catch(e){ return {error:'这个文件不是有效的 JSON。'}; }
+        return PTL.importAll(b,v.mode).then(function(r){
+          toast('已恢复 '+r.records+' 条记录，正在刷新…');
+          setTimeout(function(){ location.reload(); },800);
+        });
+      }).catch(function(e){ return {error:(e&&e.message)||'恢复失败'}; });
+    },'恢复');
+    var t=mroot.querySelector('.mtitle');
+    t.parentNode.insertBefore(el('p','fhint','备份包含文档、译文、标注、生词和阅读进度，不包含 AI 账号密钥。'),t.nextSibling);
+  }
+
+  /* ---------------- sidebar footer menus ---------------- */
+  function newMenu(anchor){
+    menu(anchor,[
+      {icon:'upload',label:'上传 PDF / Word',run:function(){ uploadPdf(); }},
+      {icon:'file-plus',label:'粘贴文章',run:function(){ newDoc(); }},
+      {sep:1},
+      {icon:'folder-plus',label:'新建文件夹',run:newFolder}
+    ]);
+  }
+  function moreMenu(anchor){
+    menu(anchor,[
+      {icon:'type',label:'阅读设置',run:openTypo},
+      {icon:'gear',label:'语音包管理',run:function(){ document.getElementById('vpopen').click(); }},
+      {icon:'key',label:'AI 账号',run:function(){ PTL.openAccount(); }},
+      {sep:1},
+      {icon:'download',label:'导出备份',key:lastBackup().replace('上次备份：',''),run:exportBackup},
+      {icon:'archive',label:'从备份恢复…',run:importBackup},
+      {sep:1},
+      {icon:'search',label:'搜索与命令',key:(MAC?'⌘':'Ctrl ')+'K',run:function(){ openCmdk(); }},
+      {icon:'spark',label:'键盘快捷键',key:'?',run:showShortcuts},
+      {icon:'book',label:'关于',run:showAbout}
+    ]);
+  }
+  document.getElementById('newbtn').addEventListener('click',function(e){ e.stopPropagation(); if(db) newMenu(this); });
+  document.getElementById('moremenu').addEventListener('click',function(e){ e.stopPropagation(); moreMenu(this); });
+  function infoBox(title,html){
+    modal(title,[],function(){ return true; },'知道了');
+    var c=mroot.querySelector('.btn.ghost'); if(c) c.remove();
+    var t=mroot.querySelector('.mtitle'), d=el('div','info-body'); d.innerHTML=html; t.parentNode.insertBefore(d,t.nextSibling);
+  }
+  function showShortcuts(){
+    var M=MAC?'⌘':'Ctrl';
+    infoBox('键盘快捷键','<dl class="keys">'+[
+      [[M,'K'],'搜索与命令'],[['/'],'搜索与命令'],[['N'],'新建（上传或粘贴）'],[['F'],'专注模式'],
+      [['空格'],'播放 / 暂停朗读'],[['Esc'],'关闭弹窗 · 退出专注模式'],[['?'],'显示这个列表']
+    ].map(function(r){ return '<dt>'+r[0].map(function(k){ return '<kbd>'+k+'</kbd>'; }).join(' ')+'</dt><dd>'+r[1]+'</dd>'; }).join('')+'</dl>');
+  }
+  function showAbout(){
+    infoBox('关于','<p>上传 PDF / Word 或粘贴文章，自动生成逐段中英对照译本，并支持标注、生词本、学习卡片与本地朗读。</p>'+
+      '<p>文档、标注和生词只保存在这台设备的浏览器里，建议定期「导出备份」。翻译等 AI 功能使用你自己登录的 AI 账号，费用从你的账号扣除。</p>'+
+      '<p>本地朗读使用开源模型 Kokoro-82M v1.1（Apache-2.0），在你的浏览器里生成。</p>');
+  }
+
+  /* ---------------- command palette (⌘K) ---------------- */
+  var cmdk=null;
+  function clickSeg(sel,attr,val){ var b=document.querySelector(sel+' button[data-'+attr+'="'+val+'"]'); if(b) b.click(); }
+  function cmdkActions(){
+    var A=[], acc=window.PTL&&PTL.account();
+    function a(g,label,ic,run,sub,key){ A.push({g:g,label:label,ic:ic,run:run,sub:sub||'',key:key||''}); }
+    a('跳转','首页','home',function(){ show('view:home'); });
+    a('跳转','我的标注','note',function(){ show('view:notes'); });
+    a('跳转','生词本','book',function(){ show('view:vocab'); });
+    if(db){
+      a('新建','上传 PDF / Word','upload',function(){ uploadPdf(); },'自动分段，翻译成中英对照','N');
+      a('新建','粘贴文章','file-plus',function(){ newDoc(); },'粘贴英文原文，或已有的中英文');
+      a('新建','新建文件夹','folder-plus',newFolder);
+    }
+    a('显示','中英对照','lang',function(){ clickSeg('#langseg','lang','both'); });
+    a('显示','仅英文','lang',function(){ clickSeg('#langseg','lang','en'); });
+    a('显示','仅中文','lang',function(){ clickSeg('#langseg','lang','zh'); });
+    a('显示','阅读设置','type',openTypo,'字号 · 行距 · 栏宽 · 字体');
+    a('显示',inFocus()?'退出专注模式':'专注模式','focus',function(){ setFocus(!inFocus()); },'','F');
+    a('显示','放大字号','type',function(){ setTypo('fs',typo.fs+1); },Math.round(FS[typo.fs]*100)+'%');
+    a('显示','缩小字号','type',function(){ setTypo('fs',typo.fs-1); },Math.round(FS[typo.fs]*100)+'%');
+    a('显示','主题：跟随系统','auto',function(){ clickSeg('#themeseg','theme','system'); });
+    a('显示','主题：明亮','sun',function(){ clickSeg('#themeseg','theme','light'); });
+    a('显示','主题：暗色','moon',function(){ clickSeg('#themeseg','theme','dark'); });
+    a('显示','显示 / 隐藏侧栏','sidebar',function(){ document.getElementById('sidetoggle').click(); });
+    a('朗读','听书','headphones',function(){ document.getElementById('ttsopen').click(); },'','空格');
+    a('朗读','语音包管理','gear',function(){ document.getElementById('vpopen').click(); });
+    a('账号与数据','AI 账号','key',function(){ PTL.openAccount(); },acc?acc.label:'未登录');
+    a('账号与数据','导出备份','download',exportBackup,lastBackup());
+    a('账号与数据','从备份恢复','archive',importBackup);
+    a('帮助','键盘快捷键','spark',showShortcuts,'','?');
+    return A;
+  }
+  function cmdkDocs(){
+    var out=[];
+    folderList().forEach(function(f){
+      docsIn(f.id).forEach(function(d){
+        var u=userDocs[d.id]||{};
+        out.push({g:'读物',label:d.title,ic:'book',sub:f.code+(d.zh?' · '+d.zh:'')+(u.author?' · '+u.author:''),extra:(u.author||''),doc:d.id,run:function(){ show(d.id); }});
+      });
+    });
+    return out;
+  }
+  // every word of the query must appear; earlier and word-start hits rank higher
+  function cmdkScore(q,it){
+    var t=(it.label+' '+it.sub+' '+(it.extra||'')).toLowerCase(), lab=it.label.toLowerCase(), sc=0;
+    var words=q.split(/\s+/).filter(Boolean);
+    for(var i=0;i<words.length;i++){
+      var w=words[i], k=lab.indexOf(w);
+      if(k>=0) sc+=12-Math.min(k,10)*0.4+(k===0||/[\s·(（\-:：\/]/.test(lab[k-1])?6:0);
+      else if(t.indexOf(w)>=0) sc+=4;
+      else return 0;
+    }
+    return sc;
+  }
+  function hilite(label,q){
+    var w=q.split(/\s+/).filter(Boolean)[0]; if(!w) return esc(label);
+    var k=label.toLowerCase().indexOf(w); if(k<0) return esc(label);
+    return esc(label.slice(0,k))+'<mark>'+esc(label.slice(k,k+w.length))+'</mark>'+esc(label.slice(k+w.length));
+  }
+  function cmdkResults(q){
+    q=q.trim().toLowerCase();
+    var docs=cmdkDocs(), acts=cmdkActions();
+    if(!q){
+      var recent=Object.keys(progress).filter(docExists).sort(function(a,b){ return (progress[b].at||0)-(progress[a].at||0); }).slice(0,5);
+      var rd=recent.map(function(id){ for(var i=0;i<docs.length;i++) if(docs[i].doc===id) return Object.assign({},docs[i],{g:'最近阅读'}); return null; }).filter(Boolean);
+      return rd.concat(acts.filter(function(x){ return x.g==='跳转'||x.g==='新建'; }),acts.filter(function(x){ return x.g==='账号与数据'||x.g==='帮助'; }));
+    }
+    function rank(list,max){ return list.map(function(x){ return {x:x,s:cmdkScore(q,x)}; }).filter(function(r){ return r.s>0; })
+      .sort(function(a,b){ return b.s-a.s; }).slice(0,max).map(function(r){ return r.x; }); }
+    var out=rank(docs,8).concat(rank(acts,8));
+    if(q.length>=2) out.push({g:'全文搜索',label:'在全部读物中搜索 “'+q+'”',ic:'search',sub:'中英文段落都会搜',raw:true,run:function(){ searchQ=q; show('view:search'); }});
+    return out;
+  }
+  function openCmdk(){
+    if(cmdk) return;
+    closePop(); closeTypo();
+    var root=el('div','cmdk-root'); root.setAttribute('role','dialog'); root.setAttribute('aria-modal','true'); root.setAttribute('aria-label','搜索与命令');
+    root.innerHTML='<div class="cmdk"><label class="cmdk-in"><svg class="ic"><use href="#i-search"></use></svg>'+
+      '<input type="text" placeholder="搜索读物、跳转或执行命令…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="cmdk-list"></label>'+
+      '<div class="cmdk-list" id="cmdk-list" role="listbox"></div>'+
+      '<div class="cmdk-foot"><span><kbd>↑</kbd><kbd>↓</kbd> 选择</span><span><kbd>↵</kbd> 打开</span><span><kbd>Esc</kbd> 关闭</span></div></div>';
+    document.body.appendChild(root);
+    var inp=root.querySelector('input'), list=root.querySelector('.cmdk-list'), items=[], sel=0;
+    cmdk={root:root};
+    function render(){
+      var q=inp.value; items=cmdkResults(q); sel=Math.min(sel,Math.max(0,items.length-1));
+      if(!items.length){ list.innerHTML='<p class="cmdk-none">没有找到匹配的读物或命令</p>'; return; }
+      var h='', g='';
+      items.forEach(function(it,i){
+        if(it.g!==g){ g=it.g; h+='<div class="cmdk-g">'+esc(g)+'</div>'; }
+        h+='<button type="button" class="cmdk-it'+(i===sel?' on':'')+'" role="option" id="cmdk-'+i+'" data-i="'+i+'" aria-selected="'+(i===sel)+'">'+
+          '<svg class="ic"><use href="#i-'+it.ic+'"></use></svg><span class="cmdk-t"><b>'+(it.raw?esc(it.label):hilite(it.label,q.trim().toLowerCase()))+'</b>'+
+          (it.sub?'<span>'+esc(it.sub)+'</span>':'')+'</span>'+(it.key?'<kbd class="cmdk-r">'+esc(it.key)+'</kbd>':'')+'</button>';
+      });
+      list.innerHTML=h;
+      inp.setAttribute('aria-activedescendant','cmdk-'+sel);
+    }
+    function move(d){
+      if(!items.length) return;
+      sel=(sel+d+items.length)%items.length;
+      [].slice.call(list.querySelectorAll('.cmdk-it')).forEach(function(b){ var on=+b.dataset.i===sel; b.classList.toggle('on',on); b.setAttribute('aria-selected',on); if(on) b.scrollIntoView({block:'nearest'}); });
+      inp.setAttribute('aria-activedescendant','cmdk-'+sel);
+    }
+    function run(i){ var it=items[i]; if(!it) return; closeCmdk(); setTimeout(it.run,0); }
+    inp.addEventListener('input',function(){ sel=0; render(); list.scrollTop=0; });
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='ArrowDown'){ e.preventDefault(); move(1); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); move(-1); }
+      else if(e.key==='Enter'){ e.preventDefault(); run(sel); }
+      else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeCmdk(); }
+    });
+    list.addEventListener('mousemove',function(e){ var b=e.target.closest('.cmdk-it'); if(b&&+b.dataset.i!==sel){ sel=+b.dataset.i; move(0); } });
+    list.addEventListener('click',function(e){ var b=e.target.closest('.cmdk-it'); if(b) run(+b.dataset.i); });
+    root.addEventListener('mousedown',function(e){ if(e.target===root) closeCmdk(); });
+    render(); inp.focus();
+  }
+  function closeCmdk(){
+    if(!cmdk) return;
+    var r=cmdk.root; cmdk=null;
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){ r.remove(); return; }
+    r.classList.add('closing'); setTimeout(function(){ r.remove(); },150);
+  }
+  document.getElementById('cmdkopen').addEventListener('click',function(){ openCmdk(); });
+
+  /* ---------------- keyboard ---------------- */
+  function typingIn(t){ return t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)); }
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey)&&!e.altKey&&!e.shiftKey&&(e.key==='k'||e.key==='K')){ e.preventDefault(); if(cmdk) closeCmdk(); else openCmdk(); return; }
+    if(cmdk||e.metaKey||e.ctrlKey||e.altKey||typingIn(e.target)||!mroot.hidden||document.querySelector('.mroot:not(#modal)')) return;
+    if(e.key==='Escape'){ if(!typoBox.hidden) closeTypo(); else if(inFocus()) setFocus(false); return; }
+    if(e.key==='/'){ e.preventDefault(); openCmdk(); }
+    else if(e.key==='f'||e.key==='F'){ e.preventDefault(); setFocus(!inFocus()); }
+    else if(e.key==='?'){ e.preventDefault(); showShortcuts(); }
+    else if((e.key==='n'||e.key==='N')&&db){
+      e.preventDefault();
+      var nb=document.getElementById('newbtn'), r=nb.getBoundingClientRect();
+      if(r.width&&r.left>=0&&!inFocus()) newMenu(nb); else openCmdk();
+    }
+  });
+
   /* ---------------- boot ---------------- */
   try{ var _lv=JSON.parse(lsGet('vocab','{}')); if(_lv&&typeof _lv==='object') vocab=_lv; }catch(e){}
   if(!(window.claude && window.claude.use)) dbReady=true;
   renderNav(); show(current);
-  window.addEventListener('ptl:account',function(){ if(current==='view:home'){ keepScrollOnce=true; show('view:home'); } });
+  window.addEventListener('ptl:account',function(){ if(current==='view:home'){ keepScrollOnce=true; show('view:home'); } else if(userDocs[current]&&userDocs[current].format==='pdf') updatePdfStat(current); });
 
   if(window.claude && window.claude.use){
     window.claude.use('db').then(function(d){

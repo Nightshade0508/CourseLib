@@ -85,9 +85,14 @@
       })
       .catch(function(e){ toast('OpenRouter 登录失败：'+(e&&e.message||e)); });
   }
-  var orModels=null;
+  var orModels=null, orPrice={}; // id -> [input, output] USD per million tokens
   function loadOpenRouterModels(){
-    if(!orModels) orModels=fetch(OR+'/models').then(function(r){ return r.json(); }).then(function(j){ return (j.data||[]).map(function(m){ return m.id; }); }).catch(function(){ orModels=null; return []; });
+    if(!orModels) orModels=fetch(OR+'/models').then(function(r){ return r.json(); }).then(function(j){
+      return (j.data||[]).map(function(m){
+        var p=m.pricing||{}; if(p.prompt!=null&&p.completion!=null) orPrice[m.id]=[parseFloat(p.prompt)*1e6,parseFloat(p.completion)*1e6];
+        return m.id;
+      });
+    }).catch(function(){ orModels=null; return []; });
     return orModels;
   }
   function newest(ids,re){
@@ -262,7 +267,7 @@
   }
 
   var subs={}; // col -> [listener]
-  var bc=null; try{ bc=new BroadcastChannel('ptl-db'); bc.onmessage=function(e){ if(e.data&&e.data.col) fire(e.data.col,false); }; }catch(e){}
+  var bc=null; try{ bc=new BroadcastChannel('ptl-db'); bc.onmessage=function(e){ if(e.data&&e.data.reload) location.reload(); else if(e.data&&e.data.col) fire(e.data.col,false); }; }catch(e){}
   function fire(col,broadcast){
     (subs[col]||[]).slice().forEach(function(l){ l.refresh(); });
     if(broadcast&&bc) try{ bc.postMessage({col:col}); }catch(e){}
@@ -316,6 +321,37 @@
     };
   }
   var db={doc:docRef,collection:colRef};
+
+  /* ---- backup: every db record plus the page's own localStorage keys ("ptl:…").
+     The AI account (keys) is deliberately left out. ---- */
+  var LOCAL_PREFIX='ptl:';
+  function allRecs(){
+    return tx('readonly',function(st){ return st?reqP(st.getAll()):Object.keys(mem).map(function(k){ return mem[k]; }); });
+  }
+  function exportAll(){
+    return allRecs().then(function(recs){
+      var local={};
+      try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(LOCAL_PREFIX)===0) local[k]=localStorage.getItem(k); } }catch(e){}
+      return {app:'parallel-text-library',version:1,exportedAt:new Date().toISOString(),
+        db:recs.map(function(r){ return {path:r.path,data:r.data}; }),local:local};
+    });
+  }
+  function importAll(b,mode){
+    if(!b||b.app!=='parallel-text-library'||!Array.isArray(b.db)) return Promise.reject({code:'bad_backup',message:'这不是 Parallel Text Library 的备份文件。'});
+    var recs=b.db.filter(function(r){ return r&&typeof r.path==='string'&&r.path.indexOf('/')>0; }).map(function(r){ var p=split(r.path); return {path:r.path,col:p.col,id:p.id,data:r.data}; });
+    return tx('readwrite',function(st){
+      if(!st){ if(mode==='replace') mem={}; recs.forEach(function(r){ mem[r.path]=r; }); return; }
+      if(mode==='replace') st.clear();
+      recs.forEach(function(r){ st.put(r); });
+    }).then(function(){
+      try{
+        if(mode==='replace'){ var del=[]; for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(LOCAL_PREFIX)===0) del.push(k); } del.forEach(function(k){ localStorage.removeItem(k); }); }
+        Object.keys(b.local||{}).forEach(function(k){ if(k.indexOf(LOCAL_PREFIX)===0) localStorage.setItem(k,b.local[k]); });
+      }catch(e){}
+      if(bc) try{ bc.postMessage({reload:true}); }catch(e){}
+      return {records:recs.length};
+    });
+  }
   if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(noop);
 
   /* ================= downloads ================= */
@@ -455,9 +491,30 @@
     setTimeout(function(){ t.classList.add('out'); setTimeout(function(){ t.remove(); },220); },2600);
   }
 
+  /* ---- cost estimate: Anthropic list prices, OpenRouter's own price list, unknown elsewhere ---- */
+  var PRICES={ // USD per million tokens [input, output]
+    'claude-fable-5-1':[10,50],'claude-fable-5':[10,50],'claude-opus-5-5':[4,20],'claude-opus-5':[5,25],
+    'claude-opus-4-8':[5,25],'claude-opus-4-7':[5,25],'claude-opus-4-6':[5,25],
+    'claude-sonnet-5-5':[2,10],'claude-sonnet-5':[2,10],'claude-sonnet-4-6':[3,15],
+    'claude-haiku-5-5':[0.1,0.5],'claude-haiku-4-5':[1,5]
+  };
+  function estimate(o){
+    if(!acct) return Promise.resolve(null);
+    var quick=o.tier==='quick', model=modelFor({modelTier:o.tier});
+    return (acct.provider==='openrouter'?loadOpenRouterModels():Promise.resolve()).then(function(){
+      var p=acct.provider==='anthropic'?PRICES[model]:acct.provider==='openrouter'?orPrice[model]:null;
+      // non-quick calls leave room for the model's own reasoning tokens
+      var out=o.outTokens*(quick?1:1.3);
+      return {model:model,tokens:Math.round(o.inTokens+out),usd:p?(o.inTokens*p[0]+out*p[1])/1e6:null,sameModel:(acct.quickModel||acct.model)===acct.model};
+    });
+  }
+
   window.PTL={
-    account:function(){ return acct?{provider:acct.provider,label:acctLabel(acct),model:acct.model}:null; },
-    openAccount:openAccount
+    account:function(){ return acct?{provider:acct.provider,label:acctLabel(acct),model:acct.model,quickModel:acct.quickModel||acct.model}:null; },
+    openAccount:openAccount,
+    estimate:estimate,
+    exportAll:exportAll,
+    importAll:importAll
   };
   function boot(){ renderChip(); finishOpenRouterLogin(); if(acct) refreshBalance(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
