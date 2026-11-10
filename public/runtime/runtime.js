@@ -12,6 +12,7 @@
   var ACCT_KEY='ptl-account', USAGE_KEY='ptl-usage', PKCE_KEY='ptl-or-verifier';
   var OR='https://openrouter.ai/api/v1';
   var SDK_URL=new URL('vendor/anthropic-sdk.mjs',document.baseURI).href;
+  var RUNTIME_BASE=(document.currentScript&&document.currentScript.src)||new URL('runtime/runtime.js',document.baseURI).href;
   function noop(){}
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){} }
@@ -397,7 +398,7 @@
   function renderChip(){
     var box=document.getElementById('acct'); if(!box) return;
     var sub;
-    if(!acct) sub='未登录 · 登录后可翻译、查词';
+    if(!acct) sub='未登录 · 可直接用免费翻译';
     else if(acct.provider==='openrouter'&&balance&&balance.remaining!=null) sub=acctLabel(acct)+' · 余额 $'+balance.remaining.toFixed(2);
     else { var u=usage[acct.provider]; sub=acctLabel(acct)+(u?' · 本机已用 '+fmtTok(u.in+u.out)+' tokens':' · 已登录'); }
     box.innerHTML='<button type="button" class="acct-chip'+(acct?' on':'')+'"><span class="acct-dot"></span><span class="acct-t"><b>AI 账号</b><span>'+esc(sub)+'</span></span></button>';
@@ -435,7 +436,7 @@
         '<p class="ferr" id="ptl-err" hidden></p>'+
         '<div class="mrow"><button type="button" class="btn ghost" data-a="logout">退出登录</button><button type="button" class="btn ghost" data-a="close">取消</button><button type="button" class="btn primary" data-a="save">保存</button></div>';
     } else {
-      h+='<p class="fhint">翻译、查词、学习卡片等功能会调用 AI 模型，费用从你自己的账号扣除。选一种方式登录：</p><div class="acct-opts">'+
+      h+='<p class="fhint">免费翻译和查词不需要登录。登录后，翻译、查词、段落解释和学习卡片会用更强的 AI 模型，费用从你自己的账号扣除。选一种方式登录：</p><div class="acct-opts">'+
         '<div class="acct-opt"><h3>OpenRouter 账号 <span class="acct-tag">推荐</span></h3><p>一键登录，按实际用量从你的 OpenRouter 余额扣费；可用 Claude、GPT、Gemini、DeepSeek 等模型。没有账号会引导你注册。</p>'+
           '<div class="acct-row"><button type="button" class="btn primary" data-a="or">用 OpenRouter 登录</button></div></div>'+
         '<div class="acct-opt"><h3>Anthropic API Key</h3><p>直接使用 Claude，从你的 Anthropic 账户扣费。在 <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Anthropic Console ↗</a> 创建密钥。</p>'+
@@ -491,6 +492,116 @@
     setTimeout(function(){ t.classList.add('out'); setTimeout(function(){ t.remove(); },220); },2600);
   }
 
+  /* ================= free translation: no account needed =================
+     1) the browser's own on-device translator (Chrome / Edge desktop)
+     2) otherwise the open-source opus-mt-en-zh model, run in a worker (runtime/mt-worker.js) */
+  var MT_LOCAL_MB=113, MT_LOCAL_KEY='ptl-mt-local';
+  var mt={engine:null,tr:null,worker:null,prep:null,seq:0,wait:{}};
+  function browserMT(){ return typeof self.Translator!=='undefined'&&typeof self.Translator.availability==='function'; }
+  function localInfo(){
+    var cached=lsGet(MT_LOCAL_KEY)==='1';
+    return {engine:'local',label:'开源翻译模型（在本机运行）',ready:!!(mt.engine==='local'&&mt.worker)||cached,download:!cached,sizeMB:MT_LOCAL_MB};
+  }
+  function mtStatus(){
+    if(mt.engine==='browser'&&mt.tr) return Promise.resolve({engine:'browser',label:'浏览器内置翻译',ready:true,download:false});
+    if(!browserMT()) return Promise.resolve(localInfo());
+    if(mt.noBrowser) return Promise.resolve(localInfo());
+    // some browsers expose the API but never answer (no on-device model service): give up after 3 s
+    var timeout=new Promise(function(res){ setTimeout(function(){ res('timeout'); },3000); });
+    return Promise.race([self.Translator.availability({sourceLanguage:'en',targetLanguage:'zh'}),timeout]).then(function(a){
+      if(a==='timeout') mt.noBrowser=true;
+      if(a==='unavailable'||a==='timeout') return localInfo();
+      return {engine:'browser',label:'浏览器内置翻译',ready:a==='available',download:a!=='available'};
+    },localInfo);
+  }
+  // onProgress(fraction 0–1) while models download; call from a click when a download is due
+  function mtPrepare(onProgress){
+    if(mt.prep) return mt.prep;
+    mt.prep=mtStatus().then(function(st){
+      if(st.engine==='browser'){
+        return self.Translator.create({sourceLanguage:'en',targetLanguage:'zh',monitor:function(m){
+          m.addEventListener('downloadprogress',function(e){ if(onProgress) onProgress(e.loaded); });
+        }}).then(function(t){ mt.tr=t; mt.engine='browser'; },function(e){
+          // the language pack can only start downloading from a click
+          if(e&&e.name==='NotAllowedError') throw {code:'mt_activation',message:'点一下「开始翻译」来下载浏览器的翻译语言包。'};
+          console.warn('Translator API:',e); return startLocal(onProgress);
+        });
+      }
+      return startLocal(onProgress);
+    }).catch(function(e){ mt.prep=null; throw e; });
+    return mt.prep;
+  }
+  function startLocal(onProgress){
+    return new Promise(function(res,rej){
+      var w=new Worker(new URL('mt-worker.js',RUNTIME_BASE),{type:'module'});
+      w.onmessage=function(e){
+        var m=e.data;
+        if(m.type==='progress'){ if(onProgress&&m.total) onProgress(m.loaded/m.total); }
+        else if(m.type==='ready'){ mt.worker=w; mt.engine='local'; lsSet(MT_LOCAL_KEY,'1'); res(); }
+        else if(m.type==='out'||m.type==='error'){
+          var cb=mt.wait[m.id]; if(!cb) { if(m.type==='error'&&!mt.worker) rej({code:'mt_failed',message:m.message}); return; }
+          delete mt.wait[m.id]; if(m.type==='out') cb.res(m.texts); else cb.rej({code:'mt_failed',message:m.message});
+        }
+      };
+      w.onerror=function(e){ rej({code:'mt_failed',message:(e&&e.message)||'翻译模型加载失败'}); };
+      w.postMessage({type:'load'});
+    });
+  }
+  // split long text at sentence ends so each piece fits the model
+  function pieces(text,max){
+    var s=text.match(/[^.!?;:]+(?:[.!?;:]+["'’”)\]]*\s*|$)/g)||[text], out=[], cur='';
+    s.forEach(function(x){
+      if(cur&&cur.length+x.length>max){ out.push(cur); cur=''; }
+      while(x.length>max){ var cut=x.lastIndexOf(' ',max); if(cut<max/2) cut=max; out.push(x.slice(0,cut)); x=x.slice(cut); }
+      cur+=x;
+    });
+    if(cur.trim()) out.push(cur);
+    return out.map(function(p){ return p.trim(); }).filter(Boolean);
+  }
+  // half-width punctuation between Chinese characters → full-width
+  function zhPunct(t){
+    var map={',':'，',';':'；',':':'：','?':'？','!':'！','(':'（',')':'）'};
+    return String(t).replace(/([㐀-鿿＀-￯])\s*([,;:?!])\s*/g,function(_,a,b){ return a+map[b]; })
+      .replace(/([㐀-鿿])\s*\(([^()]*)\)/g,'$1（$2）').replace(/\s+([㐀-鿿])/g,'$1').trim();
+  }
+  function mtTranslate(text,opts){
+    opts=opts||{};
+    if(opts.signal&&opts.signal.aborted) return Promise.reject({code:'cancelled'});
+    return mtPrepare(opts.onProgress).then(function(){
+      if(mt.engine==='browser'){
+        var parts=pieces(text,1800), out=[];
+        return parts.reduce(function(p,x){
+          return p.then(function(){
+            if(opts.signal&&opts.signal.aborted) throw {code:'cancelled'};
+            return mt.tr.translate(x).then(function(r){ out.push(r); });
+          });
+        },Promise.resolve()).then(function(){ return zhPunct(out.join('')); });
+      }
+      return new Promise(function(res,rej){
+        var id=++mt.seq; mt.wait[id]={res:res,rej:rej};
+        mt.worker.postMessage({type:'tr',id:id,texts:pieces(text,380)});
+      }).then(function(t){
+        if(opts.signal&&opts.signal.aborted) throw {code:'cancelled'};
+        return zhPunct(t.join(''));
+      });
+    });
+  }
+
+  /* ---- free dictionary (dictionaryapi.dev: Wiktionary data, no key) ---- */
+  function dictLookup(word){
+    return fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word.toLowerCase())).then(function(r){
+      if(r.status===404) return null;
+      if(!r.ok) throw {code:'dict_failed',message:'词典服务暂时不可用'};
+      return r.json();
+    }).then(function(j){
+      if(!j||!j[0]) return null;
+      var e=j[0], ph=(e.phonetics||[]).filter(function(p){ return p.text; })[0], audio=(e.phonetics||[]).filter(function(p){ return p.audio; })[0];
+      var senses=[];
+      (e.meanings||[]).forEach(function(m){ (m.definitions||[]).slice(0,2).forEach(function(d){ if(senses.length<4) senses.push({pos:m.partOfSpeech||'',def:d.definition||'',ex:d.example||''}); }); });
+      return {lemma:e.word||word,ipa:(ph&&ph.text)||e.phonetic||'',audio:audio?audio.audio:'',senses:senses};
+    });
+  }
+
   /* ---- cost estimate: Anthropic list prices, OpenRouter's own price list, unknown elsewhere ---- */
   var PRICES={ // USD per million tokens [input, output]
     'claude-fable-5-1':[10,50],'claude-fable-5':[10,50],'claude-opus-5-5':[4,20],'claude-opus-5':[5,25],
@@ -513,6 +624,8 @@
     account:function(){ return acct?{provider:acct.provider,label:acctLabel(acct),model:acct.model,quickModel:acct.quickModel||acct.model}:null; },
     openAccount:openAccount,
     estimate:estimate,
+    mt:{status:mtStatus,prepare:mtPrepare,translate:mtTranslate},
+    dict:dictLookup,
     exportAll:exportAll,
     importAll:importAll
   };

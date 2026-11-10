@@ -799,6 +799,11 @@ body.focus .player{left:50%}
 .info-body p{margin:0 0 10px}
 dl.keys{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;margin:0;align-items:center}
 dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
+body.zh-blur .docbody p.zh,body.zh-blur .docbody td.zh,body.zh-blur .docbody h2 .zh,body.zh-blur .docbody .sub .zh,body.zh-blur .docbody .ap{
+  filter:blur(5px);opacity:.75;cursor:pointer;transition:filter .28s var(--ease),opacity .28s var(--ease)}
+body.zh-blur .docbody .zh:hover,body.zh-blur .docbody .zh.reveal,body.zh-blur .docbody .ap:hover{filter:none;opacity:1}
+body.zh-blur .docbody .zh.pend{filter:none}
+@media (prefers-reduced-motion:reduce){body.zh-blur .docbody .zh{transition:none}}
 /* ---------- translation estimate ---------- */
 .ps-est{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:10px 0 0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .ps-est b{font-weight:600;color:var(--ink)}
@@ -875,6 +880,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
           <button type="button" data-lang="both" title="中英对照">对照</button>
           <button type="button" data-lang="en" title="仅英文">EN</button>
           <button type="button" data-lang="zh" title="仅中文">中</button>
+          <button type="button" data-lang="blur" title="遮住中文：鼠标移上去或点一下才显示">遮</button>
         </div>
         <button class="icon-btn" id="typoopen" type="button" title="阅读设置" aria-label="阅读设置" aria-expanded="false" aria-controls="typo"><svg class="ic" aria-hidden="true"><use href="#i-type"></use></svg></button>
         <button class="icon-btn" id="ttsopen" type="button" title="听书" aria-label="听书"><svg class="ic" aria-hidden="true"><use href="#i-headphones"></use></svg></button>
@@ -1009,7 +1015,8 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
   /* ---------------- language ---------------- */
   var segs=[].slice.call(document.querySelectorAll('#langseg button'));
   function lang(m){
-    document.body.classList.remove('only-en','only-zh');
+    document.body.classList.remove('only-en','only-zh','zh-blur');
+    if(m==='blur')document.body.classList.add('zh-blur');
     if(m==='en')document.body.classList.add('only-en');
     if(m==='zh')document.body.classList.add('only-zh');
     segs.forEach(function(b){
@@ -1493,7 +1500,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
         if(!body) return {error:'请粘贴英文原文。'};
         if(body.length>MAXCHARS) return {error:'内容过长（'+body.length+' 字符），请拆成两篇。'};
         var ex0={renamed:!!v.title.trim(),zh:v.zh.trim(),author:v.author.trim()};
-        startItemsJob(v.title.trim()||'Pasted text',v.folder,'default','paste',Promise.resolve(textItems(body)),ex0);
+        startItemsJob(v.title.trim()||openingWords(body),v.folder,defaultTier(),'paste',Promise.resolve(textItems(body)),ex0);
         return true;
       }
       if(!v.title.trim()) return {error:'请填写标题。'};
@@ -1548,7 +1555,8 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     if(!d.builtin && ud && SCHED.lectures.length) items.push({label:'关联到 C104 讲次…',run:function(){ linkLecture(d); }});
     if(!d.builtin && ud && ud.format==='pdf'){
       items.unshift({label:'重命名',run:function(){renamePdf(d);}});
-      if(ud.status!=='done' && ud.n && !(pdfJobs[d.id]&&pdfJobs[d.id].running)) items.push({label:'继续翻译',run:function(){ show(d.id); runTranslate(d.id); }});
+      if(ud.status!=='done' && ud.n && !(pdfJobs[d.id]&&pdfJobs[d.id].running)) items.push({label:'继续翻译',run:function(){ show(d.id); startTranslate(d.id); }});
+      if(ud.tier==='free' && ud.n && !(pdfJobs[d.id]&&pdfJobs[d.id].running)) items.push({label:'用 AI 重新翻译全文…',run:function(){ aiRetranslate(d.id); }});
       items.push({label:'删除',danger:true,run:function(){ confirmBox('删除“'+d.title+'”？','上传的 PDF 和已完成的翻译会一起删除，无法恢复。','删除',function(){ return deletePdf(d); }); }});
       menu(anchor,items); return;
     }
@@ -3117,21 +3125,22 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     }
     fields.push(
       {name:'folder',label:'放入文件夹',type:'select',options:folderOptions(),value:fid||folderList()[0].id},
-      {name:'tier',label:'翻译模式',type:'select',options:[
-        {value:'default',label:'标准 · 译文更讲究（推荐）'},{value:'quick',label:'快速 · 先求读懂'}]}
+      {name:'tier',label:'翻译方式',type:'select',value:defaultTier(),options:[
+        {value:'free',label:'免费 · 在浏览器里翻译，不需要登录'},
+        {value:'default',label:'AI 标准 · 译文最讲究（用你的 AI 账号）'},{value:'quick',label:'AI 快速 · 更便宜，先求读懂（用你的 AI 账号）'}]}
     );
     modal(preset?'上传：'+preset.name:'上传 PDF / Word',fields,function(v){
       var f=picked;
       if(!f) return {error:'请先选择一个文件。'};
       if(f.size>60*1024*1024) return {error:'文件太大（超过 60 MB）。'};
-      if(/\.docx$/i.test(f.name)){ startItemsJob(f.name,v.folder,v.tier||'default','docx',docxItems(f),extra); return true; }
+      if(/\.docx$/i.test(f.name)){ startItemsJob(f.name,v.folder,v.tier||defaultTier(),'docx',docxItems(f),extra); return true; }
       if(/\.doc$/i.test(f.name)) return {error:'旧版 .doc 不支持，请在 Word 里另存为 .docx。'};
       if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf') return {error:'只支持 PDF 或 .docx 文件。'};
-      startPdfJob(f,v.folder,v.tier||'default',extra);
+      startPdfJob(f,v.folder,v.tier||defaultTier(),extra);
       return true;
     },'上传并翻译');
     var t=mroot.querySelector('.mtitle');
-    var p=el('p','fhint','上传后文件名由 AI 根据内容自动生成，之后可以在“⋯ → 重命名”里修改。翻译用你登录的 AI 账号进行，费用从你的账号扣除，按篇幅约需几分钟到十几分钟，已译好的段落会先显示出来。');
+    var p=el('p','fhint','上传后文件名由 AI 根据内容自动生成，之后可以在“⋯ → 重命名”里修改。选「免费」不需要登录，在你的浏览器里翻译；选 AI 方式译文更准确，用你登录的 AI 账号、费用从账号扣除。按篇幅约需几分钟到十几分钟，已译好的段落会先显示出来。');
     t.parentNode.insertBefore(p,t.nextSibling);
     var sel=mroot.querySelector('#f-folder'); if(sel) sel.value=fid||folderList()[0].id;
   }
@@ -3154,6 +3163,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
       if(chars < r.pages.length*150){
         return getSample().then(function(s){
           if(!s) throw {code:'no_sample'};
+          if(!(window.PTL&&PTL.account())) throw {code:'scan_needs_ai'};
           metaUpdate(id,{status:'ocr',src:{name:file.name,size:file.size,pages:r.pages.length,scanned:true}});
           return ocrPdf(id,r.pdf,s,job);
         }).then(function(its){ return {items:its,meta:r.meta}; });
@@ -3190,6 +3200,9 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
       images_unavailable:'这是扫描版 PDF，但当前选择的模型不支持识别图片，请在「AI 账号」里换一个支持图片的模型。',
       prompt_too_large:'某一段太长，无法一次翻译。',
       cancelled:'已暂停。',
+      scan_needs_ai:'这是扫描版 PDF（只有图片没有文字），识别文字需要 AI 模型。请先登录 AI 账号，再重新上传。',
+      mt_activation:'点一下「开始翻译」来下载浏览器的翻译语言包。',
+      mt_failed:'免费翻译模型没能加载，请检查网络后点「继续翻译」重试。',
       empty:'没有从 PDF 中读到文字。',
       session_expired:'AI 账号登录已过期，请重新登录后继续。',
       refused:'AI 拒绝翻译其中一部分内容。',
@@ -3246,16 +3259,17 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     setStat(id,{status:'translating'});
     Promise.all([loadPdfData(id),getSample()]).then(function(r){
       var data=r[0], s=r[1];
-      if(!s) throw {code:'no_sample'};
-      var meta=userDocs[id]||{}, tier=meta.tier==='quick'?'quick':'default';
+      var meta=userDocs[id]||{}, free=meta.tier==='free', tier=meta.tier==='quick'?'quick':'default';
+      if(!s&&!free) throw {code:'no_sample'};
       metaUpdate(id,{status:'translating',err:'',beat:Date.now(),n:doneCount(data)[1]});
       var batches=makeBatches(data), qi=0, failed=null;
       function worker(){
         if(job.stop||failed||qi>=batches.length) return Promise.resolve();
         var b=batches[qi++];
-        return translateBatch(id,data,b,s,tier,job).then(worker,function(e){ failed=e; job.ctls.forEach(function(c){ try{c.abort();}catch(_){} }); });
+        return (free?translateFree(id,data,b,job):translateBatch(id,data,b,s,tier,job)).then(worker,function(e){ failed=e; job.ctls.forEach(function(c){ try{c.abort();}catch(_){} }); });
       }
-      return Promise.all([worker(),worker()]).then(function(){
+      var run=free?PTL.mt.prepare(function(f){ setStat(id,{dl:f}); }).then(function(){ setStat(id,{dl:null}); return worker(); }):Promise.all([worker(),worker()]);
+      return run.then(function(){
         return (job.wchain||Promise.resolve()).then(function(){
           job.running=false;
           var dc=doneCount(data), left=dc[1]-dc[0];
@@ -3365,7 +3379,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     var label={reading:'正在读取 PDF'+(I.ls.read?' · 第 '+I.ls.read+' 页':''),
       ocr:'扫描版：正在让 AI 识别文字'+(I.ls.ocr?' · 第 '+I.ls.ocr+' 页':''),
       naming:'正在根据内容生成标题…',
-      translating:(I.remote?'正在另一个窗口中翻译':'正在翻译')+' · '+I.done+' / '+I.n+' 段',
+      translating:(I.ls.dl!=null?'正在下载免费翻译模型 · '+Math.round(I.ls.dl*100)+'%':(I.remote?'正在另一个窗口中翻译':'正在翻译')+' · '+I.done+' / '+I.n+' 段'),
       paused:I.done?'翻译已暂停 · '+I.done+' / '+I.n+' 段':'准备翻译 · 共 '+I.n+' 段',
       error:'处理失败',
       done:''}[I.st];
@@ -3392,7 +3406,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
       '<p class="dz"'+(d.zh?'':' hidden')+'>'+esc(d.zh||'')+'</p>'+
       '<p class="dauth"'+(d.author?'':' hidden')+'>'+esc(d.author||'')+'</p>'+
       '<div class="chips"><span class="chip">'+({docx:'上传的 Word',paste:'粘贴的文本'}[src.kind]||'上传的 PDF')+'</span>'+(src.pages?'<span class="chip">原文 '+src.pages+' 页</span>':'')+
-      (src.scanned?'<span class="chip">扫描版 · AI 识别</span>':'')+'<span class="chip">逐段对照 · AI 翻译</span></div></header>'+
+      (src.scanned?'<span class="chip">扫描版 · AI 识别</span>':'')+'<span class="chip">逐段对照 · '+(d.tier==='free'?'免费翻译':'AI 翻译')+'</span></div></header>'+
       '<div class="pdfstat" id="pdfstat" hidden></div>'+
       '<div class="docbody">'+(pdfMem[id]?pdfBodyHtml(pdfMem[id]):'<p class="side-note pdf-wait">'+(d.n?'正在载入…':'')+'</p>')+'</div>';
     updatePdfStat(id);
@@ -3632,7 +3646,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
   function sampleErr(e){
     var c=(e&&e.code)||'';
     return ({not_signed_in:'请先登录你的 AI 账号（侧栏底部「AI 账号」）。',no_credits:'AI 账号余额不足，请充值后再试。',not_granted:'AI 账号的密钥无效或已失效，请重新登录。',sampling_disabled:'当前账号无法在页面里使用 Claude。',rate_limited:'用得太频繁或达到用量上限，稍后再试。',
-      refused:'AI 拒绝回答这段内容。',prompt_too_large:'内容太长了。',session_expired:'AI 账号登录已过期，请重新登录。',invalid_json:'返回格式有误，请再试一次。',cancelled:'已取消。'})[c]
+      refused:'AI 拒绝回答这段内容。',prompt_too_large:'内容太长了。',session_expired:'AI 账号登录已过期，请重新登录。',invalid_json:'返回格式有误，请再试一次。',not_found:'没有在免费词典里找到这个词。登录 AI 账号后可以按上下文解释。',mt_failed:'免费翻译模型没能加载，请检查网络后重试。',cancelled:'已取消。'})[c]
       ||('出错了：'+((e&&e.message)||'请稍后再试'));
   }
 
@@ -3937,7 +3951,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     body.innerHTML='<div class="vc-head"><span class="vc-w"></span><span class="vc-ipa"></span><span class="vc-pos"></span></div><p class="ai-wait"><span class="ps-dot"></span> 查询中…</p>';
     body.querySelector('.vc-w').textContent=word;
     var key=vocabKey(word);
-    var pr=lookCache[key]?Promise.resolve(lookCache[key]):getSample().then(function(s){
+    var pr=lookCache[key]?Promise.resolve(lookCache[key]):!(window.PTL&&PTL.account())?freeLookup(word):getSample().then(function(s){
       if(!s) throw {code:'no_sample'};
       return s.json('Dictionary lookup for an advanced English learner (native Chinese speaker) reading an academic text.\nWord as it appears: "'+word+'"\nSentence: "'+ex+'"\n'+
         'Reply with only JSON: {"lemma": "base form", "pos": "part of speech", "ipa": "/IPA/", "def": "concise English definition for THIS sense, max 20 words", "zh": "中文释义（这个语境下）", "note": "optional: usage note, collocation or academic nuance, max 20 words, or empty"}',{modelTier:'quick'});
@@ -4070,7 +4084,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     var h=vHead('首页','中英对照阅读库 · 上传、翻译、精读','Parallel Text Library');
     h+='<div class="docbody vbody">';
     h+='<h2>Getting started<span class="zh">三步开始</span></h2><ol class="v-steps">'+
-      '<li><b>登录 AI 账号</b>：'+(acct?'已登录 '+esc(acct.label)+'。':'翻译、查词、学习卡片等功能会使用你自己的 AI 账号，费用直接从账号里扣。')+
+      '<li><b>AI 账号（可选）</b>：'+(acct?'已登录 '+esc(acct.label)+'。':'不登录也能用免费翻译和查词；登录后译文更准确，还能让 AI 解释段落、生成学习卡片，费用从你自己的账号扣。')+
         ' <button type="button" class="btn ghost sm" data-acct>'+(acct?'账号设置':'登录')+'</button></li>'+
       '<li><b>添加文档</b>：点侧栏底部的「新建」（或按 <kbd>N</kbd>），上传 PDF、Word，或者粘贴文章。</li>'+
       '<li><b>阅读</b>：译好的段落会先显示；选中文字可以高亮、查词、让 AI 解释，耳机按钮可以本地朗读。</li></ol>';
@@ -4456,12 +4470,12 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     for(var k=i-1;k>=0;k--){ if(data.items[k].k!=='pg'){ prev=data.items[k].en; break; } }
     for(var k2=i+1;k2<data.items.length;k2++){ if(data.items[k2].k!=='pg'){ next=data.items[k2].en; break; } }
     var n=pdfItemEl(id,i), z=n&&n.querySelector('.zh'); if(z){ z.classList.add('pend','act'); }
-    getSample().then(function(s){
+    (meta.tier==='free'?PTL.mt.translate(it.en).then(function(t){ return {text:t}; }):getSample().then(function(s){
       if(!s) throw {code:'no_sample'};
       var g=(meta.glossary||[]).slice(-40).map(function(p){return p[0]+' => '+p[1];}).join('; ');
       return s('Re-translate this paragraph of "'+(meta.title||'')+'" into fluent, faithful academic Simplified Chinese. Translate every sentence; keep names as 中文译名（Original） on first mention; keep citations and numbers. '+(g?'Use these established translations: '+g+'. ':'')+
         'Reply with ONLY the Chinese translation, no notes.\n\nPrevious paragraph (context only): '+prev.slice(0,600)+'\n\nPARAGRAPH TO TRANSLATE:\n'+it.en+'\n\nNext paragraph (context only): '+next.slice(0,600),{cache:false});
-    }).then(function(r){
+    })).then(function(r){
       it.zh=r.text.trim().replace(/^["“]|["”]$/g,'');
       applyItem(id,i);
       return chunkRef(id,data.chunkOf[i]).set(chunkBody(id,data,data.chunkOf[i]));
@@ -4532,6 +4546,74 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     if(userDocs[id]&&userDocs[id].format==='pdf') paraTools(pane,id);
     setTimeout(trackProgress,400);
   }
+  /* ---------------- free translation (no account) ---------------- */
+  // a readable title for pasted text that will not get an AI-written one
+  function openingWords(t){
+    var first=String(t).replace(/\s+/g,' ').trim().split(/(?<=[.!?])\s/)[0];
+    var w=first.split(' ').slice(0,8).join(' ').replace(/[,;:.]+$/,'');
+    return w.length>60?w.slice(0,58)+'…':(w||'Pasted text');
+  }
+  function defaultTier(){ return window.PTL&&PTL.account()?'default':'free'; }
+  // translate one paragraph at a time with the browser / open-source translator
+  function translateFree(id,data,idxs,job){
+    var ctl=new AbortController(); job.ctls.push(ctl);
+    var chain=Promise.resolve();
+    idxs.forEach(function(i){
+      chain=chain.then(function(){
+        if(job.stop) throw {code:'cancelled'};
+        var it=data.items[i]; markPend(id,i,true);
+        return PTL.mt.translate(it.en,{signal:ctl.signal}).then(function(zh){
+          markPend(id,i,false);
+          if(zh){ it.zh=zh; applyItem(id,i); }
+        });
+      });
+    });
+    return chain.then(save,function(e){ save(); throw e; });
+    function save(){
+      idxs.forEach(function(i){ markPend(id,i,false); });
+      var cs={}; idxs.forEach(function(i){ cs[data.chunkOf[i]]=1; });
+      job.wchain=(job.wchain||Promise.resolve()).then(function(){
+        return Promise.all(Object.keys(cs).map(function(c){ return chunkRef(id,+c).set(chunkBody(id,data,+c)); }));
+      }).then(function(){
+        var dc=doneCount(data);
+        setStat(id,{done:dc[0],n:dc[1]});
+        return metaUpdate(id,{done:dc[0],beat:Date.now()});
+      }).catch(noop);
+      return job.wchain;
+    }
+  }
+  // free word lookup: Wiktionary definitions + a gloss from the free translator when it is already on this device
+  function freeLookup(word){
+    return Promise.all([
+      PTL.dict(word).catch(function(){ return null; }),
+      PTL.mt.status().then(function(st){ return st.ready?PTL.mt.translate(word).catch(function(){ return ''; }):''; },function(){ return ''; })
+    ]).then(function(r){
+      var d=r[0], zh=r[1];
+      if(!d&&!zh) throw {code:'not_found'};
+      var s0=(d&&d.senses[0])||{}, more=d?d.senses.slice(1,3).map(function(x){ return (x.pos?x.pos+'. ':'')+x.def; }).join('  ·  '):'';
+      return {lemma:d?d.lemma:word,pos:s0.pos||'',ipa:d?d.ipa:'',def:s0.def||'',zh:zh,note:more?'其他义项：'+more:''};
+    });
+  }
+  // replace a free translation with the AI one
+  function aiRetranslate(id){
+    if(!(window.PTL&&PTL.account())){ PTL.openAccount(); return; }
+    confirmBox('用 AI 重新翻译全文？','现有的免费译文会被清空，AI 会逐段重新翻译。开始前会先显示预计费用。','重新翻译',function(){
+      return loadPdfData(id).then(function(data){
+        data.items.forEach(function(it){ if(it.k!=='pg'&&it.k!=='ref'&&it.k!=='sep') it.zh=''; });
+        return saveAllChunks(id,data).then(function(){
+          var dc=doneCount(data);
+          if(userDocs[id]){ userDocs[id].tier='default'; userDocs[id].done=0; }
+          return metaUpdate(id,{tier:'default',done:0,n:dc[1],status:'paused',err:''});
+        }).then(function(){ show(id); readyToTranslate(id,false); });
+      });
+    });
+  }
+  // "遮" mode: tap a blurred translation to reveal it
+  document.addEventListener('click',function(e){
+    if(!document.body.classList.contains('zh-blur')||!e.target.closest) return;
+    var z=e.target.closest('.docbody .zh'); if(z) z.classList.toggle('reveal');
+  });
+
   /* ---------------- translation estimate ---------------- */
   // rough token model: ~4 English characters per token in, ~0.5 Chinese token per source character out,
   // plus the instructions and JSON wrapped around every batch
@@ -4546,22 +4628,38 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
   function fmtWords(n){ return n>=10000?(n/10000).toFixed(n>=100000?0:1)+' 万词':n+' 词'; }
   function fmtUsd(v){ return v<0.01?'不到 $0.01':'$'+v.toFixed(v<10?2:1); }
   function fmtTokens(n){ return n>=10000?(n/10000).toFixed(1)+' 万 tokens':n+' tokens'; }
+  function setTier(id,t){ if(userDocs[id]) userDocs[id].tier=t; updatePdfStat(id); metaUpdate(id,{tier:t}); }
   function renderEstimate(id,box){
     var z=trSize(id); if(!z) return;
     var p=el('p','ps-est'); box.appendChild(p);
-    var lead='<span>'+((userDocs[id]||{}).done?'剩余约 ':'约 ')+fmtWords(z.words)+'</span>';
-    if(!(window.PTL&&PTL.account())){ p.innerHTML=lead+'<span class="dim">登录 AI 账号后显示预估费用</span>'; return; }
-    p.innerHTML=lead+'<span class="dim">正在估算费用…</span>';
-    var tier=(userDocs[id]||{}).tier==='quick'?'quick':'default', alt=tier==='quick'?'default':'quick';
+    var d=userDocs[id]||{}, acc=window.PTL&&PTL.account();
+    var lead='<span>'+(d.done?'剩余约 ':'约 ')+fmtWords(z.words)+'</span>';
     var q={inTokens:z.inTok,outTokens:z.outTok};
+    function link(text,fn){ var b=el('button','lnk',text); b.type='button'; b.addEventListener('click',fn); p.appendChild(b); }
+    if(d.tier==='free'){
+      p.innerHTML=lead+'<span class="dim">正在检查免费翻译…</span>';
+      Promise.all([PTL.mt.status(),acc?PTL.estimate(Object.assign({tier:'default'},q)):null]).then(function(r){
+        if(!p.isConnected) return;
+        var st=r[0], ai=r[1];
+        p.innerHTML=lead+'<span><b>免费</b> · '+esc(st.label)+(st.download?(st.sizeMB?'，首次需下载约 '+st.sizeMB+' MB 模型':'，首次需下载语言包'):'')+'</span>';
+        if(acc) link('改用 AI 翻译'+(ai&&ai.usd!=null?'（约 '+fmtUsd(ai.usd)+'）':'')+'，更准确',function(){ setTier(id,'default'); });
+        else link('登录 AI 账号，译文更准确',function(){ PTL.openAccount(); });
+      }).catch(function(){ if(p.isConnected) p.innerHTML=lead; });
+      return;
+    }
+    if(!acc){
+      p.innerHTML=lead+'<span class="dim">登录 AI 账号后显示预估费用，或者</span>';
+      link('改用免费翻译',function(){ setTier(id,'free'); });
+      return;
+    }
+    p.innerHTML=lead+'<span class="dim">正在估算费用…</span>';
+    var tier=d.tier==='quick'?'quick':'default', alt=tier==='quick'?'default':'quick';
     Promise.all([PTL.estimate(Object.assign({tier:tier},q)),PTL.estimate(Object.assign({tier:alt},q))]).then(function(r){
       var a=r[0], b=r[1]; if(!a||!p.isConnected) return;
-      var h=lead+'<span>预计 <b>'+(a.usd!=null?fmtUsd(a.usd):fmtTokens(a.tokens))+'</b> · '+esc(String(a.model).replace(/^[^\/]+\//,''))+'</span>';
-      if(b&&b.model!==a.model) h+='<button type="button" class="lnk">'+(alt==='quick'?'改用快速模式':'改用标准模式')+(b.usd!=null?'（'+(b.usd<0.01?'':'约 ')+fmtUsd(b.usd)+'）':'')+'</button>';
-      if(a.usd==null) h+='<span class="dim">这个服务没有公开价格，只能估算 tokens</span>';
-      p.innerHTML=h;
-      var l=p.querySelector('.lnk');
-      if(l) l.addEventListener('click',function(){ if(userDocs[id]) userDocs[id].tier=alt; updatePdfStat(id); metaUpdate(id,{tier:alt}); });
+      p.innerHTML=lead+'<span>预计 <b>'+(a.usd!=null?fmtUsd(a.usd):fmtTokens(a.tokens))+'</b> · '+esc(String(a.model).replace(/^[^\/]+\//,''))+'</span>';
+      if(b&&b.model!==a.model) link((alt==='quick'?'改用快速模式':'改用标准模式')+(b.usd!=null?'（'+(b.usd<0.01?'':'约 ')+fmtUsd(b.usd)+'）':''),function(){ setTier(id,alt); });
+      link('改用免费翻译',function(){ setTier(id,'free'); });
+      if(a.usd==null) p.insertAdjacentHTML('beforeend','<span class="dim">这个服务没有公开价格，只能估算 tokens</span>');
     }).catch(function(){ if(p.isConnected) p.innerHTML=lead; });
   }
   // a new document waits for the reader to see its estimate; small pasted texts start straight away
@@ -4570,6 +4668,8 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     var z=trSize(id), acc=window.PTL&&PTL.account();
     function hold(){ if(userDocs[id]) userDocs[id].status='paused'; setStat(id,{status:'paused'}); metaUpdate(id,{status:'paused',err:''}); }
     if(!z){ runTranslate(id); return; }
+    // free translation starts by itself once its model is on this device
+    if((userDocs[id]||{}).tier==='free'){ hold(); PTL.mt.status().then(function(st){ if(st.ready) runTranslate(id); },noop); return; }
     if(autoIfCheap&&acc){
       PTL.estimate({inTokens:z.inTok,outTokens:z.outTok,tier:(userDocs[id]||{}).tier}).then(function(e){
         if(e&&(e.usd!=null?e.usd<=AUTO_START_USD:z.words<=1500)) runTranslate(id); else hold();
@@ -4580,6 +4680,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
   }
   function startTranslate(id){
     var d=userDocs[id]||{}, data=pdfMem[id];
+    if(d.tier==='free'){ runTranslate(id); return; }
     if(!(window.PTL&&PTL.account())){ PTL.openAccount(); return; }
     // documents added before signing in get their AI title now
     if(!d.named&&!d.renamed&&!d.done&&data){ nameDoc(id,data,(d.src&&d.src.name)||d.title||'',{title:'',author:''}).catch(noop).then(function(){ runTranslate(id); }); return; }
@@ -4723,6 +4824,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
   function showAbout(){
     infoBox('关于','<p>上传 PDF / Word 或粘贴文章，自动生成逐段中英对照译本，并支持标注、生词本、学习卡片与本地朗读。</p>'+
       '<p>文档、标注和生词只保存在这台设备的浏览器里，建议定期「导出备份」。翻译等 AI 功能使用你自己登录的 AI 账号，费用从你的账号扣除。</p>'+
+      '<p>免费翻译优先使用浏览器内置的翻译功能（Chrome / Edge 桌面版）；其他浏览器使用开源模型 <a href="https://huggingface.co/Helsinki-NLP/opus-mt-en-zh" target="_blank" rel="noopener">opus-mt-en-zh</a>（Helsinki-NLP，CC BY 4.0），通过 transformers.js 在本机运行。免费查词的释义来自 Wiktionary（CC BY-SA，经 dictionaryapi.dev）。</p>'+
       '<p>本地朗读使用开源模型 Kokoro-82M v1.1（Apache-2.0），在你的浏览器里生成。</p>');
   }
 
@@ -4743,6 +4845,7 @@ dl.keys dt{display:flex;gap:4px}dl.keys dd{margin:0;color:var(--ink)}
     a('显示','中英对照','lang',function(){ clickSeg('#langseg','lang','both'); });
     a('显示','仅英文','lang',function(){ clickSeg('#langseg','lang','en'); });
     a('显示','仅中文','lang',function(){ clickSeg('#langseg','lang','zh'); });
+    a('显示','遮住中文（学习模式）','lang',function(){ clickSeg('#langseg','lang','blur'); },'鼠标移上去或点一下才显示译文');
     a('显示','阅读设置','type',openTypo,'字号 · 行距 · 栏宽 · 字体');
     a('显示',inFocus()?'退出专注模式':'专注模式','focus',function(){ setFocus(!inFocus()); },'','F');
     a('显示','放大字号','type',function(){ setTypo('fs',typo.fs+1); },Math.round(FS[typo.fs]*100)+'%');

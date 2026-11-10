@@ -9,10 +9,12 @@
     "build:all": "node scripts/build.mjs --all",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "dev:all": "node scripts/build.mjs --all && node scripts/serve.mjs",
-    "vendor:sdk": "node scripts/vendor-sdk.mjs"
+    "vendor:sdk": "node scripts/vendor-sdk.mjs",
+    "vendor:mt": "node scripts/vendor-mt.mjs"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.132.1",
-    "esbuild": "0.25.10"
+    "esbuild": "0.25.10",
+    "@huggingface/transformers": "4.3.1"
   }
 }

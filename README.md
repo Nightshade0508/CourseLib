@@ -10,6 +10,19 @@
 - **纯静态网站**：没有后端服务器，可以免费部署在 GitHub Pages、Cloudflare Pages、Vercel、Netlify 等任何静态托管上。
 - **数据在本地**：文档、标注、生词、阅读进度保存在访客浏览器的 IndexedDB 里。
 
+## 免费翻译（不需要登录）
+
+不登录也能完整使用：上传或粘贴后选「免费」，翻译在访客自己的浏览器里完成，不经过任何服务器、不花钱。
+
+| 浏览器 | 用什么翻译 | 首次使用 |
+| --- | --- | --- |
+| Chrome / Edge 桌面版 | 浏览器内置的 Translator API（本机运行） | 浏览器自动下载语言包 |
+| Safari、Firefox、手机等 | 开源模型 [opus-mt-en-zh](https://huggingface.co/Helsinki-NLP/opus-mt-en-zh)，用 transformers.js 在后台线程运行 | 从 Hugging Face 下载约 113 MB，之后缓存在浏览器里 |
+
+免费查词用 [dictionaryapi.dev](https://dictionaryapi.dev/)（Wiktionary 释义、音标），中文释义来自上面的免费翻译。免费译文比 AI 生硬，文档菜单里可以「用 AI 重新翻译全文」。扫描版 PDF 的文字识别需要 AI 账号。
+
+另外有「遮」模式：中文译文被模糊，鼠标移上去或点一下才显示，适合先读英文再核对。
+
 ## AI 账号登录方式
 
 | 方式 | 适合 | 计费 |
@@ -80,6 +93,7 @@ OpenRouter 登录会回调到网站当前地址，部署在任何域名下都能
 ## 常见维护
 
 - **修改默认模型**：`public/runtime/runtime.js` 顶部的 `PROVIDERS`。访客也可以在「AI 账号」里自己改。
+- **升级免费翻译模型的运行库**：改 `package.json` 里 `@huggingface/transformers` 的版本，`npm install && npm run vendor:mt`，提交 `public/vendor/transformers/`。模型名在 `public/runtime/mt-worker.js`。
 - **升级 Anthropic SDK**：改 `package.json` 里的版本，`npm install && npm run vendor:sdk`，提交生成的 `public/vendor/anthropic-sdk.mjs`。
 - **改界面或功能**：都在 `public/index.html`。页面通过 `window.claude.use('sample' | 'db' | 'downloads')` 使用 AI、存储和下载，具体实现在 `runtime.js`。
 
@@ -91,4 +105,4 @@ OpenRouter 登录会回调到网站当前地址，部署在任何域名下都能
 
 ## 许可
 
-Kokoro-82M 模型为 Apache-2.0；pdf.js 为 Apache-2.0；mammoth 为 BSD-2-Clause；Anthropic SDK 为 MIT。
+Kokoro-82M 模型为 Apache-2.0；opus-mt-en-zh 为 CC BY 4.0；transformers.js 为 Apache-2.0，onnxruntime-web 为 MIT；Wiktionary 释义为 CC BY-SA；pdf.js 为 Apache-2.0；mammoth 为 BSD-2-Clause；Anthropic SDK 为 MIT。
