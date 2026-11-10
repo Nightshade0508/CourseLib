@@ -17,7 +17,7 @@
 | 浏览器 | 用什么翻译 | 首次使用 |
 | --- | --- | --- |
 | Chrome / Edge 桌面版 | 浏览器内置的 Translator API（本机运行） | 浏览器自动下载语言包 |
-| Safari、Firefox、手机等 | 开源模型 [opus-mt-en-zh](https://huggingface.co/Helsinki-NLP/opus-mt-en-zh)，用 transformers.js 在后台线程运行 | 从 Hugging Face 下载约 113 MB，之后缓存在浏览器里 |
+| Safari、Firefox、手机等 | 开源模型 [opus-mt-en-zh](https://huggingface.co/Helsinki-NLP/opus-mt-en-zh)，用 transformers.js 在后台线程运行 | 从本站下载约 113 MB（模型文件在仓库的 `public/models/` 里，不依赖 Hugging Face），之后缓存在浏览器里 |
 
 免费查词用 [dictionaryapi.dev](https://dictionaryapi.dev/)（Wiktionary 释义、音标），中文释义来自上面的免费翻译。免费译文比 AI 生硬，文档菜单里可以「用 AI 重新翻译全文」。扫描版 PDF 的文字识别需要 AI 账号。
 
@@ -93,6 +93,7 @@ OpenRouter 登录会回调到网站当前地址，部署在任何域名下都能
 ## 常见维护
 
 - **修改默认模型**：`public/runtime/runtime.js` 顶部的 `PROVIDERS`。访客也可以在「AI 账号」里自己改。
+- **更新免费翻译模型**：`node scripts/fetch-mt-model.mjs` 从 Hugging Face 重新下载并切分成 ≤20 MB 的分片（有的静态托管限制单文件 25 MB），提交 `public/models/`。
 - **升级免费翻译模型的运行库**：改 `package.json` 里 `@huggingface/transformers` 的版本，`npm install && npm run vendor:mt`，提交 `public/vendor/transformers/`。模型名在 `public/runtime/mt-worker.js`。
 - **升级 Anthropic SDK**：改 `package.json` 里的版本，`npm install && npm run vendor:sdk`，提交生成的 `public/vendor/anthropic-sdk.mjs`。
 - **改界面或功能**：都在 `public/index.html`。页面通过 `window.claude.use('sample' | 'db' | 'downloads')` 使用 AI、存储和下载，具体实现在 `runtime.js`。
