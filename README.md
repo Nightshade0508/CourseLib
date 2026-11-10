@@ -21,7 +21,14 @@
 
 免费查词用 [dictionaryapi.dev](https://dictionaryapi.dev/)（Wiktionary 释义、音标），中文释义来自上面的免费翻译。免费译文比 AI 生硬，文档菜单里可以「用 AI 重新翻译全文」。扫描版 PDF 的文字识别需要 AI 账号。
 
-另外有「遮」模式：中文译文被模糊，鼠标移上去或点一下才显示，适合先读英文再核对。
+## 句子对齐与学习模式
+
+- **句子对齐**：鼠标指向一句英文，对应的中文句子会一起高亮（反过来也一样；触屏上点一下）。分句和对齐都在浏览器里完成，用的是按句子长度的 Gale–Church 对齐，对已有的任何译文都有效，不需要重新翻译。可在「Aa」里关闭。
+- **学习模式**（工具栏「学」）：先读英文，需要时再看中文。
+  - 「读得懂的」（默认）：按你的词汇量判断每段的难度，只遮住你大概能读懂的段落；生词多或句子很长的段落照常显示中文。超出词汇量的词加虚线下划线，双击可以查。生词本里还没学会的词（复习不到第 4 箱）也算生词。
+  - 「全部」：遮住所有中文。
+  - 被遮住的中文点一下才显示。网站会统计你每周读了多少段、其中多少没看中文（「Aa」面板里能看到）。打开「根据阅读自动调整」后，每读完 20 段被遮住的段落：几乎没点开过（≤5%）就把词汇量估计调高 1000，经常点开（≥30%）就调低 1000。
+  - 词汇量判断用 `public/data/en-words.txt`：英语最常用的 4 万个词形，按 [wordfreq](https://github.com/rspeer/wordfreq) 的词频排序（数据为 CC BY-SA 4.0），由 `scripts/make-wordlist.py` 生成。
 
 ## AI 账号登录方式
 
@@ -106,4 +113,4 @@ OpenRouter 登录会回调到网站当前地址，部署在任何域名下都能
 
 ## 许可
 
-Kokoro-82M 模型为 Apache-2.0；opus-mt-en-zh 为 CC BY 4.0；transformers.js 为 Apache-2.0，onnxruntime-web 为 MIT；Wiktionary 释义为 CC BY-SA；pdf.js 为 Apache-2.0；mammoth 为 BSD-2-Clause；Anthropic SDK 为 MIT。
+Kokoro-82M 模型为 Apache-2.0；opus-mt-en-zh 为 CC BY 4.0；transformers.js 为 Apache-2.0，onnxruntime-web 为 MIT；Wiktionary 释义为 CC BY-SA；wordfreq 词频表为 CC BY-SA 4.0；pdf.js 为 Apache-2.0；mammoth 为 BSD-2-Clause；Anthropic SDK 为 MIT。
