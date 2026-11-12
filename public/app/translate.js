@@ -48,7 +48,7 @@ export function runTranslate(id){
       var b=batches[qi++];
       return (free?translateFree(id,data,b,job):translateBatch(id,data,b,s,tier,job)).then(worker,function(e){ failed=e; job.ctls.forEach(function(c){ try{c.abort();}catch(_){} }); });
     }
-    var run=free?PTL.mt.prepare(function(f){ setStat(id,{dl:f}); }).then(function(){ setStat(id,{dl:null}); return worker(); }):Promise.all([worker(),worker()]);
+    var run=free?PTL.mt.prepare(function(f){ setStat(id,{dl:f}); }).then(function(){ setStat(id,{dl:null}); freeTitle(id); return worker(); }):Promise.all([worker(),worker()]);
     return run.then(function(){
       return (job.wchain||Promise.resolve()).then(function(){
         job.running=false;
@@ -63,6 +63,15 @@ export function runTranslate(id){
     job.running=false; setStat(id,{status:'paused'});
     metaUpdate(id,{status:'paused',err:pdfErr(e)});
   });
+}
+// A web article arrives with its own title; without an AI account nothing names it in Chinese, so translate the title too.
+function freeTitle(id){
+  var m=userDocs[id]||{};
+  if(m.zh||m.renamed||!m.title||!(m.src&&m.src.kind==='url')) return;
+  PTL.mt.translate(m.title).then(function(z){
+    z=String(z||'').trim();
+    if(z&&!(userDocs[id]||{}).zh) metaUpdate(id,{zh:z.slice(0,60)});
+  }).catch(noop);
 }
 function translateBatch(id,data,idxs,s,tier,job){
   var meta=userDocs[id]||{};

@@ -6,6 +6,7 @@ import { show } from './show.js';
 import { closePop } from './menu.js';
 import { newDoc, newFolder } from './db-actions.js';
 import { uploadPdf } from './upload.js';
+import { importUrl } from './import-url.js';
 import { docExists, setSearchQ } from './views.js';
 import { progress } from './progress.js';
 import { FS, closeTypo, openTypo, setTypo, typo } from './typography.js';
@@ -26,6 +27,7 @@ function cmdkActions(){
   if(db){
     a('新建','上传 PDF / Word','upload',function(){ uploadPdf(); },'自动分段，翻译成中英对照','N');
     a('新建','粘贴文章','file-plus',function(){ newDoc(); },'粘贴英文原文，或已有的中英文');
+    a('新建','从网址导入','link',function(){ importUrl(); },'粘贴文章网址，自动读取正文并翻译');
     a('新建','新建文件夹','folder-plus',newFolder);
   }
   a('显示','中英对照','lang',function(){ clickSeg('#langseg','lang','both'); });

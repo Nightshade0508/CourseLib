@@ -160,9 +160,11 @@ function joinLine(a,b){
   return a+' '+b;
 }
 /* merge across pages, split very long blocks, add page markers */
-export function finishBlocks(blocks){
-  var out=[];
+// opts.explicit: the source marked its own headings (Markdown), so short lines are not promoted to headings
+export function finishBlocks(blocks,opts){
+  var out=[], explicit=!!(opts&&opts.explicit);
   blocks.forEach(function(b){
+    if(b.k==='img'){ out.push(b); return; }
     b.en=b.en.replace(/ﬁ/g,'fi').replace(/ﬂ/g,'fl').replace(/ﬀ/g,'ff').replace(/ﬃ/g,'ffi').replace(/\s+/g,' ').trim();
     if(isSep(b.en)){ if(out.length && out[out.length-1].k!=='sep') out.push({k:'sep',p:b.p,en:'* * *'}); return; }
     if(!b.en || b.en.length<2) return;
@@ -177,6 +179,7 @@ export function finishBlocks(blocks){
   });
   var split=[];
   out.forEach(function(b){
+    if(b.k==='img'){ split.push(b); return; }
     var t=b.en;
     while(t.length>2400){
       var cut=-1, re=/[.?!]["”’)]?\s+(?=[A-Z“"(])/g, m;
@@ -188,7 +191,8 @@ export function finishBlocks(blocks){
   });
   var inRefs=false;
   split.forEach(function(b){
-    if(!inRefs && b.k==='p' && b.en.length<40 && b.en.split(' ').length<=5 && /^[A-Z]/.test(b.en) && !/[.?!,;:]$/.test(b.en)) b.k='h';
+    if(b.k==='img') return;
+    if(!explicit && !inRefs && b.k==='p' && b.en.length<40 && b.en.split(' ').length<=5 && /^[A-Z]/.test(b.en) && !/[.?!,;:]$/.test(b.en)) b.k='h';
     var rm=/^(References|Works Cited|Bibliography|Literature Cited)\s+(\S.*)$/.exec(b.en);
     if(rm && b.k!=='p'){ b.en=rm[1]; b.rest=rm[2]; }
     if(REFS_RE.test(b.en.trim())){ b.k='h'; inRefs=true; return; }
@@ -198,6 +202,7 @@ export function finishBlocks(blocks){
   split=split.reduce(function(a,b){ a.push(b); if(b.rest){ a.push({k:'ref',p:b.p,en:b.rest}); delete b.rest; } return a; },[]);
   split.forEach(function(b){
     if(b.p>lastPg){ items.push({k:'pg',p:b.p,en:'',zh:''}); lastPg=b.p; }
+    if(b.k==='img'){ items.push({k:'img',p:b.p,en:'',zh:'',src:b.src,alt:b.alt||''}); return; }
     items.push({k:b.k,p:b.p,en:b.en,zh:''});
   });
   return items;

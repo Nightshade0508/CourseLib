@@ -49,3 +49,10 @@
 .da-lec,.da-prog{font-variant-numeric:tabular-nums}
 .doc-end{display:flex;align-items:center;justify-content:center;gap:14px;margin:72px 0 24px;padding-top:28px;border-top:1px solid var(--rule);font-family:var(--f-ui);font-size:13px;color:var(--muted)}
 .doc-loading{padding:80px 0;text-align:center}
+
+/* ---------- pictures from web articles ---------- */
+.docbody .fig{margin:1.5em 0;text-align:center;position:relative}
+.docbody .fig img{max-width:100%;max-height:72vh;height:auto;border-radius:6px;background:var(--rule-soft);vertical-align:top}
+.docbody .fig.broken{display:none}
+.chip.chip-link{text-decoration:none;color:var(--ink-2);transition:color .15s var(--ease),border-color .15s var(--ease)}
+.chip.chip-link:hover{color:var(--accent);border-color:var(--accent)}

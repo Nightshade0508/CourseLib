@@ -14,6 +14,7 @@ import { uploadPdf } from './upload.js';
 import { deletePdf, renamePdf } from './doc-render.js';
 import { SCHED } from './citations.js';
 import { startItemsJob, textItems } from './import-text.js';
+import { importUrl } from './import-url.js';
 import { aiRetranslate, defaultTier, openingWords } from './free-mt.js';
 import { startTranslate } from './estimate.js';
 
@@ -115,6 +116,7 @@ export function newDoc(fid){
      placeholder:'把课文粘贴到这里。若勾选了上面的对照选项，请让英文段落与中文段落交替出现，中间空一行。'}
   ],function(v){
     var body=(v.body||pending.text||'').trim();
+    if(/^https?:\/\/\S+$/i.test(body)){ var fsel=v.folder; setTimeout(function(){ importUrl(fsel,body); },220); return true; }
     if(v.auto){
       if(!body) return {error:'请粘贴英文原文。'};
       if(body.length>MAXCHARS) return {error:'内容过长（'+body.length+' 字符），请拆成两篇。'};

@@ -13,9 +13,18 @@ import { stopTranslate } from './translate.js';
 import { renderEstimate, startTranslate } from './estimate.js';
 
 var pdfSub=null, pdfSubId=null;   // live subscription to the open document's chunks
+// where the document came from, as small labels under its title (a web article links back to its page)
+function srcChips(d){
+  var src=d.src||{}, safe=/^https?:\/\//i.test(src.url||'');
+  return '<span class="chip">'+({docx:'上传的 Word',paste:'粘贴的文本',url:'网页文章'}[src.kind]||'上传的 PDF')+'</span>'+
+    (src.kind==='url'&&safe?'<a class="chip chip-link" href="'+esc(src.url)+'" target="_blank" rel="noopener noreferrer">'+esc(src.site||'原文')+' ↗</a>':'')+
+    (src.pages?'<span class="chip">原文 '+src.pages+' 页</span>':'')+(src.scanned?'<span class="chip">扫描版 · AI 识别</span>':'')+
+    '<span class="chip">逐段对照 · '+(d.tier==='free'?'免费翻译':'AI 翻译')+'</span>';
+}
 function pdfItemHtml(it,i){
   if(it.k==='pg') return '<div class="pg">'+(it.lab?'原书 第 '+it.lab+' 页':'PDF 第 '+it.p+' 页')+'</div>';
   if(it.k==='sep') return '<p class="sep" data-pi="'+i+'" aria-hidden="true"></p>';
+  if(it.k==='img') return /^https?:\/\//i.test(it.src||'')?'<figure class="fig" data-pi="'+i+'"><img src="'+esc(it.src)+'" alt="'+esc(it.alt||'')+'" loading="lazy" decoding="async" referrerpolicy="no-referrer"></figure>':'';
   var zc=it.zh?'zh':'zh pend';
   if(it.k==='h') return '<h2 data-pi="'+i+'">'+esc(it.en)+'<span class="'+zc+'">'+esc(it.zh||'')+'</span></h2>';
   return '<div class="pair'+(it.k==='fn'?' fnote':'')+'" data-pi="'+i+'"><p class="en">'+esc(it.en)+'</p><p class="'+zc+'">'+esc(it.zh||'')+'</p></div>';
@@ -81,8 +90,7 @@ export function renderPdfPane(d,id,pane,fo){
     '<h1 class="dt">'+esc(d.title||'')+'</h1>'+
     '<p class="dz"'+(d.zh?'':' hidden')+'>'+esc(d.zh||'')+'</p>'+
     '<p class="dauth"'+(d.author?'':' hidden')+'>'+esc(d.author||'')+'</p>'+
-    '<div class="chips"><span class="chip">'+({docx:'上传的 Word',paste:'粘贴的文本'}[src.kind]||'上传的 PDF')+'</span>'+(src.pages?'<span class="chip">原文 '+src.pages+' 页</span>':'')+
-    (src.scanned?'<span class="chip">扫描版 · AI 识别</span>':'')+'<span class="chip">逐段对照 · '+(d.tier==='free'?'免费翻译':'AI 翻译')+'</span></div></header>'+
+    '<div class="chips">'+srcChips(d)+'</div></header>'+
     '<div class="pdfstat" id="pdfstat" hidden></div>'+
     '<div class="docbody">'+(pdfMem[id]?pdfBodyHtml(pdfMem[id]):'<p class="side-note pdf-wait">'+(d.n?'正在载入…':'')+'</p>')+'</div>';
   updatePdfStat(id);
@@ -113,7 +121,7 @@ export function unwatchPdf(){ if(pdfSub){ try{pdfSub();}catch(_){} pdfSub=null; 
 export function pdfMetaChanged(id,prev,d){
   if(!prev || prev.folder!==d.folder){ setKeepScrollOnce(!!prev); show(id); return; }
   if(prev.n!==d.n && !pdfMem[id] && d.n){ setKeepScrollOnce(true); show(id); return; }
-  if(JSON.stringify(prev.src||{})!==JSON.stringify(d.src||{})){ var ch=document.querySelector('#userdoc .chips'); if(ch){ var src=d.src||{}; ch.innerHTML='<span class="chip">'+({docx:'上传的 Word',paste:'粘贴的文本'}[src.kind]||'上传的 PDF')+'</span>'+(src.pages?'<span class="chip">原文 '+src.pages+' 页</span>':'')+(src.scanned?'<span class="chip">扫描版 · AI 识别</span>':'')+'<span class="chip">逐段对照 · AI 翻译</span>'; } }
+  if(JSON.stringify(prev.src||{})!==JSON.stringify(d.src||{})||prev.tier!==d.tier){ var ch=document.querySelector('#userdoc .chips'); if(ch) ch.innerHTML=srcChips(d); }
   var pane=document.getElementById('userdoc');
   var dt=pane.querySelector('.dt'), dz=pane.querySelector('.dz'), da=pane.querySelector('.dauth');
   if(dt && dt.textContent!==d.title){ dt.textContent=d.title; document.getElementById('tbtitle').textContent=d.title; }

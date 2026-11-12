@@ -43,7 +43,8 @@ export function textItems(text){
   return finishBlocks(blocks).filter(function(it){ return it.k!=='pg'; });
 }
 /* generic job starter for docx / pasted text (PDF keeps its own path) */
-export function startItemsJob(name,folder,tier,kind,itemsP,extra){
+// pm: {title, author} already known from the source (a web page's own title), passed on to the naming step
+export function startItemsJob(name,folder,tier,kind,itemsP,extra,pm){
   var stem=String(name||'Untitled').replace(/\.(docx?|txt|md)$/i,'').trim()||'Untitled';
   var id=slug(stem).slice(0,60);
   var job=pdfJobs[id]={running:true,stop:false,ctls:[]};
@@ -58,9 +59,9 @@ export function startItemsJob(name,folder,tier,kind,itemsP,extra){
     var dc=doneCount(data);
     return saveAllChunks(id,data).then(function(){ return metaUpdate(id,{n:dc[1],done:0,status:'naming',beat:Date.now()}); }).then(function(){
       if(current===id){ setKeepScrollOnce(true); show(id); }
-      return extra&&extra.renamed?null:nameDoc(id,data,name,{title:'',author:''});
+      return extra&&extra.renamed?null:nameDoc(id,data,name,pm||{title:'',author:''});
     });
-  }).then(function(){ job.running=false; readyToTranslate(id,kind==='paste'); }).catch(function(e){
+  }).then(function(){ job.running=false; readyToTranslate(id,kind==='paste'||kind==='url'); }).catch(function(e){
     job.running=false; setStat(id,{status:'paused'});
     metaUpdate(id,{status:pdfMem[id]?'paused':'error',err:pdfErr(e)});
   });

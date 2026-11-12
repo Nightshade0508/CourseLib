@@ -1,11 +1,11 @@
 // Free translation and dictionary that need no account.
-import './import-text.js';
+import './import-url.js';
 import { noop } from './util.js';
 import { userDocs } from './state.js';
 import { show } from './show.js';
 import { confirmBox } from './organize.js';
 import {
-  chunkBody, chunkRef, doneCount, loadPdfData, metaUpdate, saveAllChunks, setStat,
+  chunkBody, chunkRef, doneCount, isText, loadPdfData, metaUpdate, saveAllChunks, setStat,
 } from './doc-store.js';
 import { applyItem, markPend } from './doc-render.js';
 import { readyToTranslate } from './estimate.js';
@@ -62,7 +62,7 @@ export function aiRetranslate(id){
   if(!(window.PTL&&PTL.account())){ PTL.openAccount(); return; }
   confirmBox('用 AI 重新翻译全文？','现有的免费译文会被清空，AI 会逐段重新翻译。开始前会先显示预计费用。','重新翻译',function(){
     return loadPdfData(id).then(function(data){
-      data.items.forEach(function(it){ if(it.k!=='pg'&&it.k!=='ref'&&it.k!=='sep') it.zh=''; });
+      data.items.forEach(function(it){ if(isText(it)) it.zh=''; });
       return saveAllChunks(id,data).then(function(){
         var dc=doneCount(data);
         if(userDocs[id]){ userDocs[id].tier='default'; userDocs[id].done=0; }

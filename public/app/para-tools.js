@@ -26,9 +26,10 @@ export function paraTools(pane,id){
 }
 function paraMenu(id,i,anchor){
   var data=pdfMem[id]; if(!data||!data.items[i]) return;
+  if(data.items[i].k==='img'){ menu(anchor,[{label:'删除这张图片',danger:true,run:function(){ data.items.splice(i,1); return restructure(id); }}]); return; }
   var items=[{label:'重新翻译本段',run:function(){ retranslateOne(id,i); }},
              {label:'编辑原文 / 译文（可拆分）',run:function(){ editPara(id,i); }}];
-  var prevI=-1; for(var k=i-1;k>=0;k--){ if(data.items[k].k==='sep') break; if(data.items[k].k!=='pg'){ prevI=k; break; } }
+  var prevI=-1; for(var k=i-1;k>=0;k--){ if(data.items[k].k==='sep'||data.items[k].k==='img') break; if(data.items[k].k!=='pg'){ prevI=k; break; } }
   if(prevI>=0) items.push({label:'与上一段合并',run:function(){ mergePara(id,prevI,i); }});
   items.push({label:'删除本段',danger:true,run:function(){ confirmBox('删除这一段？','原文和译文都会删除。','删除',function(){ data.items.splice(i,1); return restructure(id); }); }});
   menu(anchor,items);

@@ -6,6 +6,7 @@ import { modal, mroot } from './modal.js';
 import { menu } from './menu.js';
 import { newDoc, newFolder } from './db-actions.js';
 import { uploadPdf } from './upload.js';
+import { importUrl } from './import-url.js';
 import { openTypo } from './typography.js';
 import { exportBackup, importBackup, lastBackup } from './backup.js';
 import { openCmdk } from './palette.js';
@@ -14,6 +15,7 @@ export function newMenu(anchor){
   menu(anchor,[
     {icon:'upload',label:'上传 PDF / Word',run:function(){ uploadPdf(); }},
     {icon:'file-plus',label:'粘贴文章',run:function(){ newDoc(); }},
+    {icon:'link',label:'从网址导入',run:function(){ importUrl(); }},
     {sep:1},
     {icon:'folder-plus',label:'新建文件夹',run:newFolder}
   ]);

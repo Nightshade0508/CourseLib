@@ -17,7 +17,7 @@ export function uploadPdf(fid,preset,extra){
   var fields=[];
   if(!preset){
     fields.push({name:'file',label:'选择 PDF 或 Word 文件',type:'file',accept:'.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      hint:'有文字层的 PDF 直接提取；扫描版会逐页让 AI 识别文字（更慢）。Word 请用 .docx。网页文章可以复制正文，用“添加文档”粘贴并勾选自动翻译。',
+      hint:'有文字层的 PDF 直接提取；扫描版会逐页让 AI 识别文字（更慢）。Word 请用 .docx。网页文章用「新建 → 从网址导入」。',
       after:function(input){ input.addEventListener('change',function(){ picked=input.files&&input.files[0]||null; }); }});
   }
   fields.push(
@@ -109,7 +109,7 @@ export function nameDoc(id,data,fname,pm){
   return getSample().then(function(s){
     if(!s||!(window.PTL&&PTL.account())) return;
     var txt='', n=0;
-    data.items.forEach(function(it){ if(it.k!=='pg' && txt.length<3500){ txt+=(txt?'\n\n':'')+it.en; } });
+    data.items.forEach(function(it){ if(it.k!=='pg' && it.k!=='img' && txt.length<3500){ txt+=(txt?'\n\n':'')+it.en; } });
     var prompt='A university student uploaded a PDF reading to a bilingual (English–Chinese) study library. Give it a library entry.\n'+
       'File name: "'+fname+'"\nPDF metadata title: "'+(pm.title||'')+'"\nPDF metadata author: "'+(pm.author||'')+'"\n\n'+
       'Reply with only JSON: {"title": "...", "zh": "...", "author": "..."}\n'+
