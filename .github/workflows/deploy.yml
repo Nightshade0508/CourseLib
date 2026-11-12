@@ -18,7 +18,9 @@ concurrency:
 jobs:
   # Unit tests and browser tests. Nothing is deployed unless they pass.
   test:
-    runs-on: ubuntu-latest
+    # Pinned: the Playwright version in package.json ships a browser for this Ubuntu release, not necessarily
+    # for whatever "ubuntu-latest" has moved on to. Raise it together with @playwright/test.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
