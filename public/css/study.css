@@ -1,0 +1,71 @@
+/* ---------- study card ---------- */
+.study{margin:-8px 0 44px;padding:26px 28px 22px;border:1px solid var(--rule);border-radius:16px;background:var(--panel);font-family:var(--f-ui);animation:fade-in .3s var(--ease)}
+.st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.st-title{margin:0;font-family:var(--f-read);font-size:24px;font-weight:500;letter-spacing:-.01em}
+.st-title .zh{display:block;font-family:var(--f-zh);font-size:13px;color:var(--muted);margin-top:4px;font-weight:400}
+.st-act{display:flex;gap:6px;flex-wrap:wrap}
+.st-msg{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:13.5px;color:var(--ink-2)}
+.st-block{margin-top:22px}
+.st-block h3{margin:0 0 10px;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.st-thesis{margin:0;font-family:var(--f-read);font-size:19px;line-height:1.55;color:var(--ink)}
+.st-zh{font-family:var(--f-zh);color:var(--zh-ink);font-size:14px}
+p.st-zh{margin:8px 0 0;line-height:1.75}
+.st-args,.st-qs{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:9px;font-family:var(--f-read);font-size:16px;line-height:1.55;color:var(--ink)}
+.st-pg{font-family:var(--f-ui);font-size:11px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.st-terms{margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.st-terms>div{padding:12px 14px;border:1px solid var(--rule-soft);border-radius:10px;background:var(--surface)}
+.st-terms dt{font-weight:600;font-size:13.5px;color:var(--ink)}
+.st-terms dd{margin:5px 0 0;font-size:13px;line-height:1.55;color:var(--ink-2)}
+.st-quotes,.st-links{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.st-links li{font-family:var(--f-read);font-size:15.5px;line-height:1.55;color:var(--ink);padding-left:14px;position:relative}
+.st-links li::before{content:"";position:absolute;left:0;top:.7em;width:5px;height:5px;border-radius:50%;background:var(--muted)}
+.st-quotes li{padding-left:14px;border-left:2px solid var(--rule)}
+.st-q{display:inline;padding:0;border:0;background:none;text-align:left;cursor:pointer;font-family:var(--f-read);font-size:16px;line-height:1.55;font-style:italic;color:var(--ink)}
+.st-q:hover{text-decoration:underline;text-decoration-color:var(--muted);text-underline-offset:.2em}
+.st-why{display:block;margin-top:4px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.st-warn{font-size:11px;color:var(--danger)}
+.st-meta{margin:22px 0 0;font-size:11.5px;color:var(--muted)}
+.flash{animation:flash 2s var(--ease)}
+@keyframes flash{0%,30%{background:var(--accent-soft);box-shadow:0 0 0 8px var(--accent-soft)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
+/* ---------- selection toolbar (AI row) ---------- */
+.selbar{flex-wrap:wrap;max-width:min(470px,calc(100vw - 16px))}
+.sb-break{flex-basis:100%;height:1px;margin:3px 2px;background:var(--rule-soft)}
+.selbar .sb-ai{display:inline-flex;align-items:center;gap:5px;padding:0 9px 0 7px}
+.selbar .sb-ai[hidden]{display:none}
+.docbody .an-n{text-decoration:underline dotted;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:.24em;cursor:help}
+.docbody .an-n:hover{background:var(--accent-soft)}
+/* ---------- floating AI card ---------- */
+.aicard{position:fixed;z-index:90;display:flex;flex-direction:column;max-height:min(70vh,560px);background:var(--surface);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow);font-family:var(--f-ui);animation:dlg-in .2s var(--ease)}
+.aicard.out{animation:fade-out .18s ease forwards}
+.aicard.sheet{left:8px!important;right:8px;bottom:8px;top:auto!important;width:auto!important;max-height:62vh}
+.ai-head{display:flex;align-items:center;gap:8px;padding:10px 10px 6px 16px}
+.ai-title{flex:1;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ai-body{padding:4px 16px 12px;overflow:auto;font-size:14px;line-height:1.65;color:var(--ink)}
+.ai-body p{margin:0 0 8px}
+.ai-body h4{margin:10px 0 4px;font-size:12px;letter-spacing:.06em;color:var(--ink-2)}
+.ai-body ul,.ai-body ol{margin:0 0 8px;padding-left:1.2em}
+.ai-body b{font-weight:600}
+.ai-wait{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.ai-err{color:var(--danger);font-size:12.5px}
+.ai-foot{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px 12px;border-top:1px solid var(--rule-soft)}
+.ai-foot:empty{display:none}
+.cite-label{margin:6px 0 4px!important;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cite-box{padding:10px 12px;border-radius:9px;background:var(--panel);border:1px solid var(--rule-soft);font-family:var(--f-read);font-size:15px;line-height:1.55;user-select:all}
+.note-q{margin:0 0 10px;padding-left:12px;border-left:2px solid var(--rule);font-family:var(--f-read);color:var(--ink-2);font-style:italic}
+.note-t{white-space:pre-wrap}
+.vc-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.vc-w{font-family:var(--f-read);font-size:24px;font-weight:500}
+.vc-ipa{color:var(--muted);font-size:13px}
+.vc-pos{font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-2)}
+.vc-zh{font-family:var(--f-zh);font-size:15.5px;color:var(--ink)}
+.vc-def{color:var(--ink-2)}
+.vc-note{font-size:12.5px;color:var(--muted)}
+.vc-ex{padding:8px 10px;border-radius:8px;background:var(--panel);font-family:var(--f-read);font-size:14.5px;color:var(--ink-2)}
+.vc-ex b{color:var(--ink);font-weight:600}
+.toast{position:fixed;left:50%;bottom:28px;z-index:120;transform:translateX(-50%);padding:10px 16px;border-radius:10px;background:var(--ink);color:var(--bg);font-family:var(--f-ui);font-size:13px;box-shadow:var(--shadow);animation:pl-in .2s var(--ease)}
+.toast.out{animation:fade-out .2s ease forwards}
+/* ---------- paragraph tools ---------- */
+.docbody [data-pi]{position:relative}
+.pt-btn{position:absolute;right:-40px;top:0;opacity:.5;width:30px;height:30px}
+.pt-btn:hover{opacity:1}
+@media (max-width:900px){.pt-btn{right:-4px;top:-30px}}

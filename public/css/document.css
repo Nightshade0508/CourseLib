@@ -1,0 +1,105 @@
+/* ---------- reading layout ---------- */
+.reading{display:grid;grid-template-columns:minmax(0,1fr) 240px;align-items:start}
+.reading.no-toc{grid-template-columns:minmax(0,1fr)}
+.docwrap{min-width:0}
+.doc{max-width:720px;margin:0 auto;padding:64px 40px 140px}
+.dochead{display:flex;flex-direction:column;gap:14px;padding-bottom:36px;margin-bottom:40px;border-bottom:1px solid var(--rule)}
+.eyebrow{margin:0;font-family:var(--f-ui);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.dt{margin:0;font-family:var(--f-read);font-size:clamp(30px,4.2vw,42px);line-height:1.1;font-weight:500;letter-spacing:-.018em;text-wrap:balance}
+.dz{margin:0;font-size:17px;line-height:1.6;color:var(--ink-2)}
+.dauth{margin:0;font-size:16px;font-style:italic;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{font-family:var(--f-ui);font-size:11.5px;color:var(--ink-2);border:1px solid var(--rule);border-radius:999px;padding:4px 11px;line-height:1.4}
+
+/* ---------- document body ---------- */
+.docbody{font-size:17.5px;line-height:1.72}
+.docbody > *:first-child{margin-top:0}
+.docbody h1{font-size:28px;font-weight:500;line-height:1.2;letter-spacing:-.01em;margin:64px 0 18px;text-wrap:balance}
+.docbody h2{font-size:25px;font-weight:500;line-height:1.25;letter-spacing:-.012em;margin:72px 0 26px;text-wrap:balance}
+.docbody h1 .zh,.docbody h2 .zh{display:block;margin-top:8px;font-size:15px;font-weight:400;letter-spacing:0;color:var(--muted)}
+.docbody h3{font-size:19px;font-weight:500;margin:40px 0 14px}
+.docbody h3.an2{font-size:16px;font-weight:600;margin:32px 0 12px}
+.docbody h3.an2 .zh{display:block;font-size:13.5px;font-weight:400;color:var(--muted);margin-top:4px}
+.docbody h2.an{font-size:21px}
+.docbody .sub{font-style:italic;font-size:18px;margin:6px 0 0}
+.docbody .sub .zh{display:block;font-style:normal;font-size:15px;color:var(--ink-2);margin-top:4px}
+.docbody .src{font-family:var(--f-zh);font-size:13.5px;line-height:1.85;color:var(--ink-2);margin:0 0 44px;padding:18px 20px;background:var(--panel);
+  border:1px solid var(--rule-soft);border-radius:12px}
+.docbody .pg{display:flex;align-items:center;gap:14px;margin:52px 0 28px;font-family:var(--f-ui);font-size:11px;letter-spacing:.12em;color:var(--muted);font-variant-numeric:tabular-nums}
+.docbody .pg::after{content:"";flex:1;height:1px;background:var(--rule-soft)}
+.docbody .pair{display:flex;flex-direction:column;gap:10px;margin:0 0 30px}
+.docbody .pair p{margin:0}
+.docbody p.en{color:var(--ink)}
+.docbody p.zh{font-size:16px;line-height:1.95;color:var(--zh-ink)}
+.docbody .pair.quote{margin:8px 0 34px;padding:2px 0 2px 22px;border-left:1px solid var(--ink-2);font-size:16px}
+.docbody .pair.quote p.zh{font-size:15px}
+.docbody .pair.quote .cite{font-family:var(--f-ui);font-size:11px;letter-spacing:.06em;color:var(--muted)}
+.docbody .pair.insert,.docbody .pair.fnote{padding:18px 22px;background:var(--panel);border:1px solid var(--rule-soft);border-radius:12px;font-size:15px;line-height:1.7}
+.docbody .pair.insert{margin:6px 0 20px}
+.docbody .pair.insert + .pair.insert{margin-top:-8px}
+.docbody .pair.insert p.zh,.docbody .pair.fnote p.zh{font-size:14.5px;line-height:1.85}
+.docbody .pair.fnote p.en{color:var(--ink-2)}
+.docbody .pair.it p.en{font-style:italic}
+.docbody .rm{font-style:normal}
+.docbody .pair.center{text-align:center;align-items:center;margin:40px 0;font-variant-caps:all-small-caps;letter-spacing:.06em}
+.docbody .pair.center p.zh{font-variant-caps:normal;letter-spacing:.04em}
+.docbody .pair.vprose{font-size:18px}
+.docbody .epi{margin:0 0 6px;font-size:15px}
+.docbody .epi .en{font-style:italic}
+.docbody .attr{font-family:var(--f-ui);font-size:12.5px;color:var(--muted);margin:0 0 28px}
+.docbody .ap{margin:0 0 14px;color:var(--zh-ink);font-size:16px;line-height:1.95}
+.docbody .apair{margin:0 0 18px}
+.docbody .sec{display:flex;align-items:center;gap:16px;margin:84px 0 36px;font-family:var(--f-ui);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2)}
+.docbody .sec::before,.docbody .sec::after{content:"";flex:1;height:1px;background:var(--rule)}
+.docbody .sec .zh{font-family:var(--f-zh);letter-spacing:.06em;text-transform:none;font-weight:400;color:var(--muted)}
+.docbody figure{margin:44px 0;display:flex;flex-direction:column;align-items:center;gap:14px}
+.docbody figure img{max-width:min(100%,520px);height:auto;border-radius:6px;border:1px solid var(--rule-soft)}
+.docbody figcaption{align-self:stretch;font-size:13.5px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.docbody figcaption .en{font-style:italic}
+.docbody sup{font-family:var(--f-ui);font-size:.6em;vertical-align:super;line-height:0;color:var(--muted);margin-left:1px}
+.docbody .note{font-family:var(--f-zh);font-size:13px;line-height:1.8;color:var(--muted);border-top:1px solid var(--rule);padding-top:18px;margin-top:64px}
+.tablewrap{overflow-x:auto}
+.docbody table:not(.verse){display:block;overflow-x:auto;border-collapse:collapse;width:100%;font-family:var(--f-ui);font-size:13px;margin:28px 0;font-variant-numeric:tabular-nums}
+.docbody table:not(.verse) th,.docbody table:not(.verse) td{border-bottom:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+.docbody table:not(.verse) th{font-weight:600;color:var(--ink-2)}
+.docbody code{font-family:ui-monospace,Menlo,monospace;font-size:.88em;background:var(--rule-soft);padding:1px 5px;border-radius:4px}
+.docbody ul:not(.refs){padding-left:22px;margin:0 0 18px}
+.docbody ul:not(.refs) li{margin-bottom:6px}
+.docbody ul.refs{list-style:none;margin:14px 0 0;padding:0;font-size:14px;line-height:1.6;color:var(--ink-2);display:flex;flex-direction:column;gap:9px}
+.docbody ul.refs li{padding-left:24px;text-indent:-24px;overflow-wrap:anywhere}
+
+/* verse: English left, Chinese right */
+.docbody .unit{margin:0 0 30px}
+.docbody table.verse{width:100%;border-collapse:collapse;margin:0}
+.docbody table.verse td{vertical-align:top;padding:2px 0;width:50%;font-size:16.5px;line-height:1.62}
+.docbody table.verse td.en{padding-right:28px}
+.docbody table.verse td.zh{padding-left:calc(28px + var(--ind,0em));border-left:1px solid var(--rule-soft);color:var(--zh-ink);font-size:15.5px}
+.docbody .notes{margin-top:12px;padding:14px 18px;background:var(--panel);border:1px solid var(--rule-soft);border-radius:12px}
+.docbody .nh{font-family:var(--f-ui);font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.docbody .nt{margin:0 0 8px;font-size:14px;line-height:1.7}
+.docbody .ph{font-style:italic;color:var(--ink)}
+.docbody .ph::after{content:" — ";font-style:normal;color:var(--muted)}
+.docbody .nb{color:var(--ink-2)}
+
+/* journal entries */
+.docbody h3.mon{font-family:var(--f-ui);font-size:11.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);
+  margin:52px 0 12px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.docbody .entry{display:grid;grid-template-columns:128px minmax(0,1fr);gap:4px 24px;padding:12px 0;border-bottom:1px solid var(--rule-soft)}
+.docbody .entry .date{grid-column:1;grid-row:1;font-family:var(--f-ui);font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
+.docbody .entry .wx{grid-column:1;grid-row:2;font-family:var(--f-ui);font-size:11.5px;color:var(--muted);line-height:1.5}
+.docbody .entry .obs{grid-column:2;grid-row:1 / span 2;font-size:15.5px}
+.docbody .entry.cont{border-bottom:0;padding-top:0}
+
+/* ---------- outline rail ---------- */
+.toc{position:sticky;top:calc(var(--bar-h) + 40px);align-self:start;max-height:calc(100vh - var(--bar-h) - 72px);display:flex;flex-direction:column;
+  padding:0 28px 0 0;margin-top:64px}
+.toc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.toc-title{font-family:var(--f-ui);font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.toc-head .icon-btn{width:28px;height:28px}
+.toc-head .icon-btn .ic{width:15px;height:15px}
+.toc-list{overflow-y:auto;display:flex;flex-direction:column;border-left:1px solid var(--rule)}
+.toc-link{background:none;border:0;text-align:left;cursor:pointer;padding:6px 0 6px 14px;margin-left:-1px;border-left:1px solid transparent;
+  font-family:var(--f-ui);font-size:12.5px;line-height:1.45;color:var(--muted);transition:color .15s,border-color .15s}
+.toc-link:hover{color:var(--ink)}
+.toc-link.lv2{padding-left:26px;font-size:12px}
+.toc-link.on{color:var(--ink);border-left-color:var(--ink)}

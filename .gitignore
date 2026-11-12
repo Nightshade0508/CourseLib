@@ -6,3 +6,5 @@ dist/
 
 # The repo is public: course readings are never committed (see README).
 content/docs/
+test-results/
+playwright-report/

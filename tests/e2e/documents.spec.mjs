@@ -40,6 +40,8 @@ test('highlights survive a reload and show up under 我的标注', async ({ page
   await expect(page.locator('#selbar')).toBeVisible();
   await page.locator('#selbar .sw.c-y').click();
   await expect(page.locator('#userdoc mark.an.c-y')).toHaveText('Objectivity');
+  // the write to the browser database is asynchronous: let it land before reloading
+  await expect.poll(() => page.evaluate(async () => (await (await window.claude.use('db')).collection('marks').get()).size)).toBe(1);
 
   await page.reload();
   await expect(page.locator('#userdoc mark.an.c-y')).toHaveText('Objectivity');

@@ -90,10 +90,12 @@ export async function pasteArticle(page, text, { title } = {}) {
 export const zh = (page) => page.locator('#userdoc p.zh');
 export const en = (page) => page.locator('#userdoc p.en');
 
-// Wait until every paragraph of the open document has a translation.
+// Wait until every paragraph of the open document has a translation and the progress bar is gone
+// (the page re-renders once more when the job finishes, so interacting before that is racy).
 export async function waitTranslated(page, min = 1) {
   await page.waitForFunction((n) => {
     const z = [...document.querySelectorAll('#userdoc p.zh')];
-    return z.length >= n && z.every((x) => x.textContent.trim());
+    const stat = document.getElementById('pdfstat');
+    return z.length >= n && z.every((x) => x.textContent.trim()) && (!stat || stat.hidden);
   }, min, { timeout: 45_000 });
 }

@@ -1,10 +1,12 @@
 // Builds the deployable site into dist/:
-//   public/        copied as is (page, runtime, vendor libraries, Kokoro voice model)
+//   public/        copied as is (page, app and runtime modules, vendor libraries, voice and translation models)
+//   index.html     gets a <link rel="modulepreload"> per app module, so the browser fetches them all at once
+//                  instead of discovering them import by import
 //   content/       library.json → dist/library.js, plus the selected docs/*.json
 // By default only docs marked "public": true are included, so copyrighted course
 // readings stay out of the public site. `--all` includes every doc (personal build).
 import { existsSync } from 'node:fs';
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -33,5 +35,16 @@ await writeFile(path.join(out, 'library.js'),
   (sched ? `window.__SCHED__ = ${js(sched)};\n` : '') +
   `window.__FOLDERS__ = ${js(folders)};\nwindow.__DOCS__ = ${js(docs)};\n`);
 await writeFile(path.join(out, '.nojekyll'), '');
+
+// preload every module the page starts with (the app, its helpers, the runtime)
+const modules = [];
+for (const dir of ['app', 'app/lib', 'runtime']) {
+  for (const f of (await readdir(path.join(out, dir))).sort()) if (f.endsWith('.js') && !/worker/.test(f)) modules.push(dir + '/' + f);
+}
+const page = path.join(out, 'index.html');
+const html = await readFile(page, 'utf8');
+const entry = '<script type="module" src="app/main.js"></script>';
+if (!html.includes(entry)) throw new Error('index.html: module entry not found');
+await writeFile(page, html.replace('</head>', modules.map((m) => `<link rel="modulepreload" href="${m}">`).join('\n') + '\n</head>'));
 
 console.log(`dist/ built: ${docs.length} docs, ${folders.length} folders${sched ? ', with schedule' : ''}${all ? ' (all content)' : ''}`);

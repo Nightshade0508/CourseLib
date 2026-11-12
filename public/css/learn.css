@@ -1,0 +1,25 @@
+/* ---------- sentence alignment & progressive Chinese ---------- */
+:root{--align-bg:rgba(44,62,53,.10)}
+:root[data-theme="dark"]{--align-bg:rgba(195,211,201,.16)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--align-bg:rgba(195,211,201,.16)}}
+::highlight(align){background-color:var(--align-bg)}
+::highlight(unk){text-decoration:underline dotted;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:.22em}
+body.zh-blur.learn-smart .docbody p.zh:not(.ez),body.zh-blur.learn-smart .docbody td.zh:not(.ez),
+body.zh-blur.learn-smart .docbody h2 .zh,body.zh-blur.learn-smart .docbody .sub .zh,body.zh-blur.learn-smart .docbody .ap{filter:none;opacity:1;cursor:auto}
+body.zh-blur.learn-smart .docbody .zh.ez:hover:not(.reveal){filter:blur(5px);opacity:.75}
+.typo{max-height:calc(100vh - var(--bar-h) - 24px);overflow-y:auto}
+.ty-sec{display:flex;align-items:baseline;justify-content:space-between;padding-top:12px;border-top:1px solid var(--rule-soft);font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ty-hint{font-size:11px;font-weight:400;letter-spacing:0;text-transform:none}
+.ty-check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.ty-check input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.ty-stat{margin:0;padding:10px 12px;border-radius:10px;background:var(--panel);font-size:12px;line-height:1.6;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.ty-stat:empty{display:none}
+.ty-stat b{font-weight:600;color:var(--ink)}
+.typo.all-mode .ty-smart{display:none}
+#ty-vl{min-width:56px;text-align:center;font-size:12.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+/* ---------- translation estimate ---------- */
+.ps-est{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:10px 0 0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.ps-est b{font-weight:600;color:var(--ink)}
+.ps-est .lnk{border:0;background:none;padding:0;font:inherit;color:var(--ink-2);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:.25em;cursor:pointer}
+.ps-est .lnk:hover{color:var(--ink);text-decoration-color:var(--ink-2)}
+.ps-est .dim{color:var(--muted)}

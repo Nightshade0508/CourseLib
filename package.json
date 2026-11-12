@@ -10,12 +10,18 @@
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",
     "dev:all": "node scripts/build.mjs --all && node scripts/serve.mjs",
     "vendor:sdk": "node scripts/vendor-sdk.mjs",
-    "vendor:mt": "node scripts/vendor-mt.mjs"
+    "vendor:mt": "node scripts/vendor-mt.mjs",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "0.132.1",
     "@huggingface/transformers": "4.3.1",
     "@playwright/test": "^1.56.1",
-    "esbuild": "0.25.10"
+    "acorn": "^8.19.0",
+    "esbuild": "0.25.10",
+    "eslint-scope": "^8.4.0",
+    "globals": "^16.5.0"
   }
 }
