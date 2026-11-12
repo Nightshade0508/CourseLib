@@ -134,3 +134,10 @@ document.getElementById('ty-vauto').addEventListener('change',function(){ LEARN.
 document.body.classList.toggle('learn-smart',LEARN.mode==='smart');
 renderLearnPanel();
 learnRefresh();
+// the account's learning settings arrived from another device (runtime/sync.js): take them over
+window.addEventListener('ptl:prefs',function(){
+  LEARN.mode=lsGet('learn','smart')==='all'?'all':'smart'; LEARN.level=+lsGet('vlevel','8000')||8000; LEARN.auto=lsGet('vauto','1')!=='0';
+  try{ var s=JSON.parse(lsGet('learn-stats','null')); if(s&&s.days) LSTAT={days:s.days,win:s.win||{e:0,r:0}}; }catch(e){}
+  document.body.classList.toggle('learn-smart',LEARN.mode==='smart');
+  renderLearnPanel(); learnRefresh();
+});

@@ -46,6 +46,11 @@ function cmdkActions(){
   a('显示','显示 / 隐藏侧栏','sidebar',function(){ document.getElementById('sidetoggle').click(); });
   a('朗读','听书','headphones',function(){ document.getElementById('ttsopen').click(); },'','空格');
   a('朗读','语音包管理','gear',function(){ document.getElementById('vpopen').click(); });
+  var me=PTL.user&&PTL.user();
+  if(PTL.accounts){
+    a('账号与数据',me?'我的账号':'登录 / 注册','user',function(){ PTL.openUser(); },me?me.email:'登录后内容自动存到云端');
+    if(me) a('账号与数据','立即同步','sync',function(){ PTL.sync.now(); },PTL.sync.text());
+  }
   a('账号与数据','AI 账号','key',function(){ PTL.openAccount(); },acc?acc.label:'未登录');
   a('账号与数据','导出备份','download',exportBackup,lastBackup());
   a('账号与数据','从备份恢复','archive',importBackup);

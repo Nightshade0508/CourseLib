@@ -16,9 +16,18 @@ export default defineConfig({
     viewport: { width: 1360, height: 900 },
     trace: 'off',
   },
-  webServer: {
-    command: `node scripts/build.mjs && node scripts/serve.mjs ${PORT}`,
-    url: `http://localhost:${PORT}/`,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: `node scripts/build.mjs && node scripts/serve.mjs ${PORT}`,
+      url: `http://localhost:${PORT}/`,
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      // Firebase emulators (accounts + cloud database) for tests/e2e/accounts.spec.mjs; needs Java 21+
+      command: 'npx -y firebase-tools@15.36.0 emulators:start --only auth,firestore --project demo-ptl',
+      url: 'http://127.0.0.1:9099/',
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+  ],
 });

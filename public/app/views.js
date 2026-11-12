@@ -44,6 +44,13 @@ function progBar(id){
   var p=progress[id]||{}, pct=p.done?100:Math.round(p.pct||0);
   return '<span class="pbar" title="已读 '+pct+'%"><span style="width:'+pct+'%"></span></span><span class="pnum">'+(p.done?'已读完':pct+'%')+'</span>';
 }
+// where the reader's content lives right now: this device only, or their account
+export function storageNote(){
+  var P=window.PTL||{}, u=P.user&&P.user();
+  if(u) return '已登录 '+esc(u.email||'')+'：读物、标注和生词会自动同步到你的账号，换设备登录就能接着读。';
+  if(P.accounts) return '现在没有登录：文档、标注和生词只保存在这台设备的浏览器里。在侧栏底部登录后，会自动存到云端并在你的设备之间同步。';
+  return '文档、标注和生词保存在这台设备的浏览器里，换设备或清除浏览器数据后不会保留，建议定期在侧栏「⋯ → 导出备份」。';
+}
 function viewHome(pane){
   if(!SCHED.lectures.length) return viewWelcome(pane);
   var today=todayISO(), wk=weekOf(today);
@@ -81,7 +88,7 @@ function viewWelcome(pane){
   h+='<h2>Getting started<span class="zh">三步开始</span></h2><ol class="v-steps">'+
     '<li><b>AI 账号（可选）</b>：'+(acct?'已登录 '+esc(acct.label)+'。':'不登录也能用免费翻译和查词；登录后译文更准确，还能让 AI 解释段落、生成学习卡片，费用从你自己的账号扣。')+
       ' <button type="button" class="btn ghost sm" data-acct>'+(acct?'账号设置':'登录')+'</button></li>'+
-    '<li><b>添加文档</b>：点侧栏底部的「新建」（或按 <kbd>N</kbd>），上传 PDF、Word，或者粘贴文章。</li>'+
+    '<li><b>添加文档</b>：点侧栏底部的「新建」（或按 <kbd>N</kbd>），上传 PDF、Word，粘贴文章，或者直接给一个文章网址。</li>'+
     '<li><b>阅读</b>：译好的段落会先显示；选中文字可以高亮、查词、让 AI 解释，耳机按钮可以本地朗读。</li></ol>';
   var rec=Object.keys(progress).filter(docExists).sort(function(a,b){ return (progress[b].at||0)-(progress[a].at||0); }).slice(0,6);
   if(rec.length){
@@ -93,7 +100,7 @@ function viewWelcome(pane){
   if(samples.length){
     h+='<h2>Sample texts<span class="zh">示例读物</span></h2><ul class="v-list">'+samples.map(function(d){ var m=docMeta(d.id); return '<li><button type="button" class="v-doc" data-open="'+esc(d.id)+'"><span class="v-t">'+esc(m.title)+'</span>'+progBar(d.id)+'</button></li>'; }).join('')+'</ul>';
   }
-  h+='<p class="v-src">文档、标注和生词保存在这台设备的浏览器里，换设备或清除浏览器数据后不会保留，建议定期在侧栏「⋯ → 导出备份」。按 <kbd>'+(MAC?'⌘':'Ctrl')+'</kbd> <kbd>K</kbd> 可以随时搜索和执行命令。</p></div>';
+  h+='<p class="v-src">'+storageNote()+'按 <kbd>'+(MAC?'⌘':'Ctrl')+'</kbd> <kbd>K</kbd> 可以随时搜索和执行命令。</p></div>';
   pane.innerHTML=h;
   wireViewLinks(pane);
   var ab=pane.querySelector('[data-acct]'); if(ab) ab.addEventListener('click',function(){ PTL.openAccount(); });

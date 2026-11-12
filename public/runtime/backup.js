@@ -1,7 +1,7 @@
 // Backup: every db record plus the page's own localStorage keys; never the AI key.
 import './db.js';
 import { noop } from './util.js';
-import { bc, mem, reqP, setMem, split, tx } from './db.js';
+import { bc, mem, noteChanged, reqP, setMem, split, tx } from './db.js';
 
 var LOCAL_PREFIX='ptl:';
 function allRecs(){
@@ -18,11 +18,18 @@ export function exportAll(){
 export function importAll(b,mode){
   if(!b||b.app!=='parallel-text-library'||!Array.isArray(b.db)) return Promise.reject({code:'bad_backup',message:'这不是 Parallel Text Library 的备份文件。'});
   var recs=b.db.filter(function(r){ return r&&typeof r.path==='string'&&r.path.indexOf('/')>0; }).map(function(r){ var p=split(r.path); return {path:r.path,col:p.col,id:p.id,data:r.data}; });
-  return tx('readwrite',function(st){
+  return tx('readwrite',function(st,ob){
     if(!st){ if(mode==='replace') setMem({}); recs.forEach(function(r){ mem[r.path]=r; }); return; }
-    if(mode==='replace') st.clear();
-    recs.forEach(function(r){ st.put(r); });
+    var now=Date.now();
+    function put(){ recs.forEach(function(r){ st.put(r); if(ob) ob.put({path:r.path,m:now}); }); }
+    if(mode!=='replace') return put();
+    // in an account, what the backup does not contain is deleted from the cloud copy too
+    return (ob?reqP(st.getAllKeys()):Promise.resolve([])).then(function(keys){
+      keys.forEach(function(k){ ob.put({path:k,m:now,del:1}); });
+      st.clear(); put();
+    });
   }).then(function(){
+    noteChanged();
     try{
       if(mode==='replace'){ var del=[]; for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(LOCAL_PREFIX)===0) del.push(k); } del.forEach(function(k){ localStorage.removeItem(k); }); }
       Object.keys(b.local||{}).forEach(function(k){ if(k.indexOf(LOCAL_PREFIX)===0) localStorage.setItem(k,b.local[k]); });

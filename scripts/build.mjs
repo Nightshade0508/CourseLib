@@ -38,7 +38,7 @@ await writeFile(path.join(out, '.nojekyll'), '');
 
 // preload every module the page starts with (the app, its helpers, the runtime)
 const modules = [];
-for (const dir of ['app', 'app/lib', 'runtime']) {
+for (const dir of ['app', 'app/lib', 'runtime', 'runtime/lib']) {
   for (const f of (await readdir(path.join(out, dir))).sort()) if (f.endsWith('.js') && !/worker/.test(f)) modules.push(dir + '/' + f);
 }
 const page = path.join(out, 'index.html');

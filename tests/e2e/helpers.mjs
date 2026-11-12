@@ -99,3 +99,48 @@ export async function waitTranslated(page, min = 1) {
     return z.length >= n && z.every((x) => x.textContent.trim()) && (!stat || stat.hidden);
   }, min, { timeout: 45_000 });
 }
+
+// ---- accounts: the site talks to the local Firebase emulators (see firebase.json) instead of a real project ----
+export const EMULATORS = { auth: 'http://127.0.0.1:9099', firestore: '127.0.0.1:8787', project: 'demo-ptl' };
+const ACCOUNT_CONFIG = `window.PTL_CONFIG={firebase:{apiKey:'demo-key',authDomain:'demo-ptl.firebaseapp.com',projectId:'demo-ptl',appId:'demo'},emulators:{auth:'${EMULATORS.auth}',firestore:'${EMULATORS.firestore}'}};`;
+export async function useAccounts(page) {
+  await page.route('**/config.js', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: ACCOUNT_CONFIG }));
+}
+let seq = 0;
+export const newEmail = () => `reader-${Date.now().toString(36)}-${process.pid}-${++seq}@example.com`;
+
+// Fill in the sign-in dialog; the page reloads into the account's library.
+export async function signUp(page, email, password = 'secret123', { merge } = {}) {
+  await page.click('#user .user-chip');
+  await page.click('.user-tabs [data-mode="up"]');
+  await page.fill('#user-email', email);
+  await page.fill('#user-pw', password);
+  await page.click('.user-form button[type=submit]');
+  if (merge !== undefined) await page.locator(`.user-form [data-a="${merge ? 'yes' : 'no'}"]`).click();
+  await signedIn(page, email);
+}
+export async function signIn(page, email, password = 'secret123') {
+  await page.click('#user .user-chip');
+  await page.fill('#user-email', email);
+  await page.fill('#user-pw', password);
+  await page.click('.user-form button[type=submit]');
+  await signedIn(page, email);
+}
+export async function signedIn(page, email) {
+  await expect(page.locator('#user .user-chip.on')).toContainText(email, { timeout: 20_000 });
+  await page.waitForFunction(() => window.PTL && PTL.sync.state().phase === 'idle', null, { timeout: 20_000 });
+}
+// Upload this device's changes and fetch the account's, now (the page would do it by itself within a minute).
+export async function syncNow(page) {
+  await page.waitForFunction(() => PTL.sync.state().phase !== 'starting');
+  await expect.poll(async () => {
+    await page.evaluate(() => PTL.sync.now());
+    return page.evaluate(() => { const s = PTL.sync.state(); return s.phase + ':' + (s.pending || 0); });
+  }, { timeout: 20_000 }).toBe('idle:0');
+}
+// What the emulator's cloud database holds for an account (read with admin rights).
+export async function cloudRecords(request, uid) {
+  const r = await request.get(`http://${EMULATORS.firestore}/v1/projects/${EMULATORS.project}/databases/(default)/documents/users/${uid}/records?pageSize=300`, { headers: { Authorization: 'Bearer owner' } });
+  const docs = (await r.json()).documents || [];
+  return docs.map((d) => ({ path: d.fields.p.stringValue, deleted: !!d.fields.x.booleanValue }));
+}
