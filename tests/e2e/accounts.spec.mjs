@@ -22,10 +22,17 @@ async function restSignIn(request, email, password = 'secret123') {
 }
 
 test('accounts stay out of the way until the site is configured for them', async ({ page }) => {
+  await page.route('**/config.js', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: 'window.PTL_CONFIG={firebase:null};' }));
   await openApp(page);
   await expect(page.locator('#user')).toBeEmpty();
   expect(await page.evaluate(() => PTL.accounts)).toBe(false);
   expect(await page.evaluate(() => PTL.user())).toBe(null);
+});
+
+test('the site\'s own configuration turns accounts on', async ({ page }) => {
+  await openApp(page);
+  expect(await page.evaluate(() => PTL.accounts)).toBe(true);
+  await expect(page.locator('#user')).toContainText('登录 / 注册');
 });
 
 test.describe('with accounts turned on', () => {
