@@ -51,7 +51,7 @@ function cmdkActions(){
     a('账号与数据',me?'我的账号':'登录 / 注册','user',function(){ PTL.openUser(); },me?me.email:'登录后内容自动存到云端');
     if(me) a('账号与数据','立即同步','sync',function(){ PTL.sync.now(); },PTL.sync.text());
   }
-  a('账号与数据','AI 账号','key',function(){ PTL.openAccount(); },acc?acc.label:'未登录');
+  a('账号与数据','AI 服务','key',function(){ PTL.openAccount(); },acc?acc.label:'未连接 · 用免费翻译');
   a('账号与数据','导出备份','download',exportBackup,lastBackup());
   a('账号与数据','从备份恢复','archive',importBackup);
   a('帮助','键盘快捷键','spark',showShortcuts,'','?');

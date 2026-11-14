@@ -28,6 +28,8 @@ export default defineConfig({
       url: 'http://127.0.0.1:9099/',
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
+      // let firebase-tools stop the Java emulator it started, or the next run finds its port taken
+      gracefulShutdown: { signal: 'SIGINT', timeout: 15_000 },
     },
   ],
 });

@@ -1,11 +1,13 @@
 // The AI account dialog and the chip in the sidebar.
-import './downloads.js';
+import './hub.js';
 import { esc } from './util.js';
 import {
   PROVIDERS, acct, acctLabel, balance, hostOf, refreshBalance, setAccount, usage,
 } from './ai-account.js';
 import { loadOpenRouterModels, startOpenRouterLogin } from './openrouter.js';
 import { loadSdk } from './sample.js';
+import { activeTab, closeHub, defineTab, openHub, panel, setChip } from './hub.js';
+export { renderChip } from './hub.js';
 
 var css=document.createElement('style');
 css.textContent=
@@ -29,35 +31,32 @@ css.textContent=
   'details.acct-more[open] summary{margin-bottom:10px}';
 document.head.appendChild(css);
 
-function fmtTok(n){ return n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':String(n||0); }
-export function renderChip(){
-  var box=document.getElementById('acct'); if(!box) return;
-  var sub;
-  if(!acct) sub='未登录 · 可直接用免费翻译';
-  else if(acct.provider==='openrouter'&&balance&&balance.remaining!=null) sub=acctLabel(acct)+' · 余额 $'+balance.remaining.toFixed(2);
-  else { var u=usage[acct.provider]; sub=acctLabel(acct)+(u?' · 本机已用 '+fmtTok(u.in+u.out)+' tokens':' · 已登录'); }
-  box.innerHTML='<button type="button" class="acct-chip'+(acct?' on':'')+'"><span class="acct-dot"></span><span class="acct-t"><b>AI 账号</b><span>'+esc(sub)+'</span></span></button>';
-  box.firstChild.addEventListener('click',openAccount);
+export function fmtTok(n){ return n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':String(n||0); }
+// one line about the AI service, for the sidebar chip
+export function aiSummary(){
+  if(!acct) return '免费翻译';
+  if(acct.provider==='openrouter'&&balance&&balance.remaining!=null) return acctLabel(acct)+' · 余额 $'+balance.remaining.toFixed(2);
+  var u=usage[acct.provider]; return acctLabel(acct)+(u?' · 本机已用 '+fmtTok(u.in+u.out)+' tokens':'');
 }
+// the chip when the site has no accounts: it is only about the AI service
+setChip(function(){
+  var box=document.getElementById('acct'); if(!box) return;
+  box.innerHTML='<button type="button" class="acct-chip'+(acct?' on':'')+'"><span class="acct-dot"></span><span class="acct-t"><b>AI 账号</b><span>'+esc(acct?aiSummary():'未登录 · 可直接用免费翻译')+'</span></span></button>';
+  box.firstChild.addEventListener('click',openAccount);
+});
 
+// the "AI 服务" tab of the account dialog (hub.js)
 export var dlg=null;
+defineTab('ai','AI 服务',{order:2,open:renderDialog,closed:function(){ dlg=null; }});
 export function openAccount(){
-  if(dlg){ renderDialog(); return; }
-  dlg=document.createElement('div'); dlg.className='mroot'; dlg.setAttribute('role','dialog'); dlg.setAttribute('aria-modal','true'); dlg.setAttribute('aria-label','AI 账号');
-  dlg.addEventListener('click',function(e){ if(e.target===dlg) closeAccount(); });
-  document.addEventListener('keydown',escClose);
-  document.body.appendChild(dlg);
-  renderDialog();
+  openHub('ai');
   if(acct&&acct.provider==='openrouter'){ refreshBalance(); loadOpenRouterModels().then(function(){ if(dlg) renderDialog(); }); }
 }
-function escClose(e){ if(e.key==='Escape') closeAccount(); }
-function closeAccount(){
-  if(!dlg) return; var d=dlg; dlg=null; document.removeEventListener('keydown',escClose);
-  d.classList.add('closing'); setTimeout(function(){ d.remove(); },180);
-}
+function closeAccount(){ closeHub(); }
 export function renderDialog(){
-  if(!dlg) return;
-  var h='<div class="mbox"><div class="mform"><h2 class="mtitle">AI 账号</h2>';
+  if(!dlg&&activeTab()!=='ai') return;
+  dlg=panel('ai');
+  var h='<div class="mform">';
   if(acct){
     var u=usage[acct.provider]||{in:0,out:0};
     h+='<dl class="acct-stat"><dt>服务</dt><dd>'+esc(acctLabel(acct))+'</dd>'+
@@ -85,7 +84,7 @@ export function renderDialog(){
       '<p class="ferr" id="ptl-err" hidden></p>'+
       '<div class="mrow"><button type="button" class="btn ghost" data-a="close">关闭</button></div>';
   }
-  h+='</div></div>';
+  h+='</div>';
   dlg.innerHTML=h;
   if(acct&&acct.provider==='openrouter') loadOpenRouterModels().then(function(ids){
     var dl=dlg&&dlg.querySelector('#ptl-ml'); if(dl) dl.innerHTML=ids.map(function(id){ return '<option value="'+esc(id)+'">'; }).join('');

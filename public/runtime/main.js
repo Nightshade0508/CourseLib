@@ -6,13 +6,14 @@ import { sample } from './sample.js';
 import { db, user } from './db.js';
 import { exportAll, importAll } from './backup.js';
 import { downloads } from './downloads.js';
-import { openAccount, renderChip } from './ai-account-ui.js';
+import { openAccount } from './ai-account-ui.js';
+import { openHub } from './hub.js';
 import { mtPrepare, mtStatus, mtTranslate } from './mt.js';
 import { dictLookup } from './dict.js';
 import { estimate } from './prices.js';
 import { cloudOn } from './cloud.js';
 import { syncNow, syncState } from './sync.js';
-import { openAccountDialog, openSignIn, startAccounts, syncText } from './user-ui.js';
+import { startAccounts, syncText } from './user-ui.js';
 
 window.claude={use:function(name){
   if(name==='sample') return Promise.resolve(sample);
@@ -31,8 +32,8 @@ window.PTL={
   // site accounts and cloud sync (off unless public/config.js configures them)
   accounts:cloudOn,
   user:function(){ return user?{uid:user.uid,email:user.email,name:user.name}:null; },
-  openUser:function(){ if(user) openAccountDialog(); else openSignIn(); },
+  openUser:function(){ openHub('account'); },
   sync:{now:syncNow,state:function(){ return syncState; },text:syncText}
 };
-function boot(){ renderChip(); startAccounts(); finishOpenRouterLogin(); if(acct) refreshBalance(); }
+function boot(){ startAccounts(); finishOpenRouterLogin(); if(acct) refreshBalance(); }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();

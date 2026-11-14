@@ -87,6 +87,7 @@ test('asking for AI while signed out opens the account dialog instead of failing
   await expect(page.locator('#newbtn')).toBeVisible();
   const code = await page.evaluate(() => window.claude.use('sample').then((s) => s('hi')).then(() => 'ok', (e) => e.code));
   expect(code).toBe('not_signed_in');
-  await expect(page.locator('.mtitle', { hasText: 'AI 账号' })).toBeVisible();
+  await expect(page.locator('.hub-panel[data-tab="ai"]')).toBeVisible();
+  await expect(page.locator('#ptl-ak')).toBeVisible();
   await ctx.close();
 });

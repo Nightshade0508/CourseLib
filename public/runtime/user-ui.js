@@ -8,7 +8,9 @@ import {
 } from './cloud.js';
 import { onSync, startSync, syncNow, syncState } from './sync.js';
 import { setAccount } from './ai-account.js';
-import { toast } from './ai-account-ui.js';
+import { aiSummary, toast } from './ai-account-ui.js';
+import { acct } from './ai-account.js';
+import { closeHub, defineTab, openHub, panel, renderChip, setChip } from './hub.js';
 
 var PERSON='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1-3.5 3.8-5 7-5s6 1.5 7 5"/></svg>';
 var GOOGLE='<svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.33-1.58-5.04-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.96 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/></svg>';
@@ -27,39 +29,30 @@ export function syncText(){
   if(s.phase==='idle') return (s.pending?'有 '+s.pending+' 项待同步':'已同步'+(s.at?' · '+ago(s.at):''))+(s.tooBig?' · '+s.tooBig+' 项太大未同步':'');
   return '';
 }
+// The one chip in the sidebar: who you are (and whether your library is synced), and which AI service is connected.
 export function renderUserChip(){
-  var box=document.getElementById('user'); if(!box) return;
-  if(!cloudOn){ box.innerHTML=''; return; }
-  if(!user){
-    box.innerHTML='<button type="button" class="acct-chip user-chip"><span class="user-av">'+PERSON+'</span><span class="acct-t"><b>登录 / 注册</b><span>内容自动存到云端，换设备也能看</span></span></button>';
-    box.firstChild.addEventListener('click',function(){ openSignIn(); });
-    return;
+  var box=document.getElementById('acct'); if(!box) return;
+  var ai='AI：'+aiSummary(), name, sub, cls='', av;
+  if(!user){ name='登录 / 注册'; sub=ai; av='<span class="user-av">'+PERSON+'</span>'; }
+  else {
+    name=user.email||user.name||'我的账号';
+    sub=syncText()+' · '+ai;
+    cls=' on s-'+syncState.phase; av='<span class="user-av">'+esc(name.trim().charAt(0).toUpperCase())+'</span>';
   }
-  var name=user.email||user.name||'我的账号';
-  box.innerHTML='<button type="button" class="acct-chip user-chip on s-'+esc(syncState.phase)+'"><span class="user-av">'+esc(name.trim().charAt(0).toUpperCase())+'</span><span class="acct-t"><b>'+esc(name)+'</b><span>'+esc(syncText())+'</span></span></button>';
-  box.firstChild.addEventListener('click',function(){ if(syncState.phase==='expired') openSignIn(user.email); else openAccountDialog(); });
-  // an open account dialog only has its status line refreshed, so nothing being typed is lost
-  var line=dlg&&dlg._kind==='account'&&dlg._view==='main'?$('#user-sync'):null; if(line) line.textContent=syncText();
+  box.innerHTML='<button type="button" class="acct-chip user-chip'+cls+'" title="账号与 AI 服务">'+av+'<span class="acct-t"><b>'+esc(name)+'</b><span>'+esc(sub)+'</span></span>'+(acct?'<span class="chip-ai" title="已连接 AI 服务"></span>':'')+'</button>';
+  box.firstChild.addEventListener('click',function(){ if(user&&syncState.phase==='expired') openSignIn(user.email); else openHub('account'); });
+  // an open account tab only has its status line refreshed, so nothing being typed is lost
+  var line=dlg&&dlg._view==='main'?$('#user-sync'):null; if(line) line.textContent=syncText();
 }
 
-// ---- one dialog at a time ----
+// ---- the "账号" tab of the account dialog (hub.js) ----
 var dlg=null;
-function openDialog(kind,label){
-  closeDialog();
-  dlg=document.createElement('div'); dlg.className='mroot'; dlg._kind=kind;
-  dlg.setAttribute('role','dialog'); dlg.setAttribute('aria-modal','true'); dlg.setAttribute('aria-label',label);
-  dlg.addEventListener('mousedown',function(e){ dlg._down=e.target===dlg; });
-  dlg.addEventListener('click',function(e){ if(e.target===dlg&&dlg._down&&!dlg._busy) closeDialog(); });
-  document.addEventListener('keydown',escClose);
-  document.body.appendChild(dlg);
+defineTab('account','账号',{order:1,visible:function(){ return cloudOn; },open:function(){ if(user) openAccountDialog(); else openSignIn(); },closed:function(){ dlg=null; }});
+function openDialog(kind){
+  dlg=panel('account'); dlg._kind=kind; dlg._busy=false; dlg._view=null; dlg._painted=null;
   return dlg;
 }
-function escClose(e){ if(e.key==='Escape'&&dlg&&!dlg._busy) closeDialog(); }
-function closeDialog(){
-  if(!dlg) return;
-  var d=dlg; dlg=null; document.removeEventListener('keydown',escClose);
-  d.classList.add('closing'); setTimeout(function(){ d.remove(); },180);
-}
+function closeDialog(){ closeHub(); }
 function $(sel){ return dlg?dlg.querySelector(sel):null; }
 function say(msg,good){ var e=$('.ferr'); if(e){ e.textContent=msg||''; e.hidden=!msg; e.classList.toggle('good',!!good); } }
 function busy(on){ if(!dlg) return; dlg._busy=on; [].slice.call(dlg.querySelectorAll('button,input')).forEach(function(b){ b.disabled=on; }); }
@@ -67,9 +60,9 @@ function busy(on){ if(!dlg) return; dlg._busy=on; [].slice.call(dlg.querySelecto
 // ---- sign in / register ----
 export function openSignIn(email,mode){
   if(!cloudOn) return;
-  var d=openDialog('signin','登录');
+  var d=openDialog('signin');
   d._mode=mode==='up'?'up':'in';
-  d.innerHTML='<div class="mbox"><form class="mform user-form" novalidate>'+
+  d.innerHTML='<form class="mform user-form" novalidate>'+
     '<h2 class="mtitle"></h2>'+
     '<div class="user-tabs" role="tablist"><button type="button" role="tab" data-mode="in">登录</button><button type="button" role="tab" data-mode="up">注册</button></div>'+
     '<button type="button" class="btn user-google" data-a="google">'+GOOGLE+'<span>用 Google 账号继续</span></button>'+
@@ -80,7 +73,7 @@ export function openSignIn(email,mode){
     '<p class="ferr" hidden></p>'+
     '<div class="mrow user-row"><button type="button" class="lnk user-forgot" data-a="forgot">忘记密码？</button><span class="user-grow"></span>'+
     '<button type="button" class="btn ghost" data-a="close">取消</button><button type="submit" class="btn primary"></button></div>'+
-    '</form></div>';
+    '</form>';
   function paint(){
     var up=d._mode==='up';
     $('.mtitle').textContent=up?'注册账号':'登录';
@@ -125,14 +118,14 @@ function afterSignIn(u){
     if(!g.total||!dlg) return false;
     return new Promise(function(res){
       dlg._busy=true;
-      dlg.innerHTML='<div class="mbox"><div class="mform user-form"><h2 class="mtitle">把这台设备上的内容放进账号？</h2>'+
+      dlg.innerHTML='<div class="mform user-form"><h2 class="mtitle">把这台设备上的内容放进账号？</h2>'+
         '<p class="fhint user-lead">这台设备上有未登录时保存的内容'+(g.docs?'：<b>'+g.docs+' 篇文档</b>':'')+'（连同标注、生词等共 '+g.total+' 条记录）。放进账号后会同步到云端，在你的其他设备上也能看到。</p>'+
-        '<div class="mrow"><button type="button" class="btn ghost" data-a="no">不用，保持分开</button><button type="button" class="btn primary" data-a="yes">放进我的账号</button></div></div></div>';
+        '<div class="mrow"><button type="button" class="btn ghost" data-a="no">不用，保持分开</button><button type="button" class="btn primary" data-a="yes">放进我的账号</button></div></div>';
       $('[data-a=yes]').addEventListener('click',function(){ res(true); });
       $('[data-a=no]').addEventListener('click',function(){ res(false); });
     });
   }).then(function(merge){
-    if(dlg){ dlg._busy=true; dlg.innerHTML='<div class="mbox"><div class="mform user-form"><h2 class="mtitle">正在打开你的账号…</h2><p class="fhint user-lead">马上就好。</p></div></div>'; }
+    if(dlg){ dlg._busy=true; dlg.innerHTML='<div class="mform user-form"><h2 class="mtitle">正在打开你的账号…</h2><p class="fhint user-lead">马上就好。</p></div>'; }
     return merge?adoptGuest(u.uid):0;
   }).catch(noop).then(function(){
     setLocalUser({uid:u.uid,email:u.email||'',name:u.displayName||''});
@@ -143,14 +136,14 @@ function afterSignIn(u){
 // ---- the signed-in account ----
 export function openAccountDialog(){
   if(!user) return openSignIn();
-  var d=openDialog('account','我的账号');
+  var d=openDialog('account');
   d._view='main';
   paintAccount();
   cloud().then(function(c){ if(dlg===d){ d._fb=c.auth.currentUser; paintAccount(); } },noop);
 }
 function paintAccount(){
   if(!dlg||dlg._kind!=='account'||dlg._busy) return;
-  var d=dlg, fb=d._fb, h='<div class="mbox"><div class="mform user-form">';
+  var d=dlg, fb=d._fb, h='<div class="mform user-form">';
   if(d._view==='out'){
     h+='<h2 class="mtitle">退出登录</h2>'+
       (syncState.pending?'<p class="fhint user-lead user-warn">还有 '+syncState.pending+' 项改动没有传到云端。先点“立即同步”，或者保留这台设备上的内容，下次登录时会继续上传。</p>':'<p class="fhint user-lead">退出后，这台设备回到未登录状态；你的内容仍然在云端，再次登录就会回来。</p>')+
@@ -175,7 +168,7 @@ function paintAccount(){
       '<div class="mrow"><button type="button" class="btn ghost" data-a="toout">退出登录</button><button type="button" class="btn primary" data-a="close">完成</button></div>';
   }
   var keepOpen=d.querySelector('details.acct-more')&&d.querySelector('details.acct-more').open, msg=$('.ferr')&&!$('.ferr').hidden?[$('.ferr').textContent,$('.ferr').classList.contains('good')]:null;
-  d.innerHTML=h+'</div></div>';
+  d.innerHTML=h+'</div>';
   if(keepOpen&&d.querySelector('details.acct-more')) d.querySelector('details.acct-more').open=true;
   if(msg&&d._view===d._painted) say(msg[0],msg[1]);
   d._painted=d._view;
@@ -205,9 +198,10 @@ function accountAct(a){
 }
 
 export function startAccounts(){
-  renderUserChip();
-  if(!cloudOn) return;
+  if(!cloudOn){ renderChip(); return; }
+  setChip(renderUserChip);
+  renderChip();
   onSync(renderUserChip);
-  setInterval(function(){ if(user&&syncState.phase==='idle') renderUserChip(); },60000);      // keeps "… 分钟前" honest
+  setInterval(function(){ if(user&&syncState.phase==='idle'&&!document.hidden) renderUserChip(); },60000);      // keeps "… 分钟前" honest
   if(user) startSync();
 }

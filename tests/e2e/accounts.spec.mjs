@@ -1,6 +1,6 @@
 // Accounts and cloud sync, against the Firebase emulators: real sign-up, real security rules, real sync between
 // two browser profiles standing in for two devices.
-import { test, expect, openApp, fakeBrowserTranslator, pasteArticle, waitTranslated, zh, en,
+import { test, expect, openApp, mockAI, fakeBrowserTranslator, pasteArticle, waitTranslated, zh, en,
   useAccounts, newEmail, signUp, signIn, signedIn, syncNow, cloudRecords, EMULATORS } from './helpers.mjs';
 
 async function newDevice(browser) {
@@ -24,32 +24,37 @@ async function restSignIn(request, email, password = 'secret123') {
 test('accounts stay out of the way until the site is configured for them', async ({ page }) => {
   await page.route('**/config.js', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: 'window.PTL_CONFIG={firebase:null};' }));
   await openApp(page);
-  await expect(page.locator('#user')).toBeEmpty();
+  await expect(page.locator('#acct')).toContainText('AI 账号');
+  await expect(page.locator('#acct')).not.toContainText('登录 / 注册');
   expect(await page.evaluate(() => PTL.accounts)).toBe(false);
+  await page.click('#acct .acct-chip');
+  await expect(page.locator('.hub-tabs')).toBeHidden();             // only the AI tab, so no tab bar
+  await expect(page.locator('#ptl-ak')).toBeVisible();
   expect(await page.evaluate(() => PTL.user())).toBe(null);
 });
 
 test('the site\'s own configuration turns accounts on', async ({ page }) => {
   await openApp(page);
   expect(await page.evaluate(() => PTL.accounts)).toBe(true);
-  await expect(page.locator('#user')).toContainText('登录 / 注册');
+  await expect(page.locator('#acct')).toContainText('登录 / 注册');
 });
 
 test.describe('with accounts turned on', () => {
   test.beforeEach(async ({ page }) => {
     await useAccounts(page);
+    await mockAI(page);
     await fakeBrowserTranslator(page);
   });
 
   test('a new account syncs its library to a second device, and edits travel both ways', async ({ page, browser }) => {
     const email = newEmail();
     await openApp(page);
-    await expect(page.locator('#user')).toContainText('登录 / 注册');
+    await expect(page.locator('#acct')).toContainText('登录 / 注册');
     await signUp(page, email);
     await pasteArticle(page, 'Numbers create distance, and distance creates trust.\n\nA second paragraph follows here.', { title: 'Synced Essay' });
     await waitTranslated(page, 2);
     await syncNow(page);
-    await expect(page.locator('#user')).toContainText('已同步');
+    await expect(page.locator('#acct')).toContainText('已同步');
 
     // a second device signs in and finds the document, translation included
     const b = await newDevice(browser);
@@ -101,10 +106,10 @@ test.describe('with accounts turned on', () => {
     expect((await cloudRecords(page.request, uid)).map((r) => r.path).some((p) => p.startsWith('pdf/guest-notes'))).toBe(true);
 
     // sign out: back to an empty signed-out library; the account's content is not shown
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await page.click('.user-form [data-a="toout"]');
     await page.click('.user-form [data-a="signout"]');
-    await expect(page.locator('#user')).toContainText('登录 / 注册');
+    await expect(page.locator('#acct')).toContainText('登录 / 注册');
     expect(await navTitles(page)).toEqual([]);
 
     // sign in again: everything is back
@@ -124,16 +129,16 @@ test.describe('with accounts turned on', () => {
     await syncNow(page);
     const uid = await uidOf(page);
 
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await page.click('.user-form [data-a="toout"]');
     await page.check('#user-drop');
     await page.click('.user-form [data-a="signout"]');
-    await expect(page.locator('#user')).toContainText('登录 / 注册');
+    await expect(page.locator('#acct')).toContainText('登录 / 注册');
     expect(await navTitles(page)).toEqual(['Device Only']);
     await expect.poll(() => page.evaluate(async (name) => (await indexedDB.databases()).some((d) => d.name === name), 'parallel-text-library::' + uid)).toBe(false);
 
     // the cloud copy was not touched: signing in brings the account's document back, without merging the device's
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await page.fill('#user-email', email);
     await page.fill('#user-pw', 'secret123');
     await page.click('.user-form button[type=submit]');
@@ -148,12 +153,12 @@ test.describe('with accounts turned on', () => {
     page.allowErrors(/Failed to load resource/);                    // the emulator answers 400 to bad credentials
     await openApp(page);
     await signUp(page, email);
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await page.click('.user-form [data-a="toout"]');
     await page.click('.user-form [data-a="signout"]');
-    await expect(page.locator('#user')).toContainText('登录 / 注册');
+    await expect(page.locator('#acct')).toContainText('登录 / 注册');
 
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     const err = page.locator('.user-form .ferr');
     await page.click('.user-form button[type=submit]');
     await expect(err).toHaveText('请输入邮箱。');
@@ -177,13 +182,13 @@ test.describe('with accounts turned on', () => {
     const email = newEmail();
     await openApp(page);
     await signUp(page, email);
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await expect(page.locator('.user-form')).toContainText('邮箱未验证');
     await page.click('.user-form [data-a="toout"]');
     await page.click('.user-form [data-a="signout"]');
-    await expect(page.locator('#user')).toContainText('登录 / 注册');
+    await expect(page.locator('#acct')).toContainText('登录 / 注册');
 
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await page.click('.user-form [data-a="forgot"]');
     await expect(page.locator('.user-form .ferr')).toContainText('先填上邮箱');
     await page.fill('#user-email', email);
@@ -243,7 +248,7 @@ test.describe('with accounts turned on', () => {
     await context.setOffline(true);
     await pasteArticle(page, 'Written on a train with no signal.\n\nSecond paragraph.', { title: 'Offline Essay' });
     await waitTranslated(page, 2);
-    await expect(page.locator('#user')).toContainText(/离线|待同步|稍后/);
+    await expect(page.locator('#acct')).toContainText(/离线|待同步|稍后/);
     await context.setOffline(false);
     await syncNow(page);
 
@@ -266,15 +271,15 @@ test.describe('with accounts turned on', () => {
 
     await admin({ disableUser: true });                              // e.g. the password was changed on another device
     await page.reload();
-    await expect(page.locator('#user')).toContainText('登录已过期', { timeout: 20_000 });
+    await expect(page.locator('#acct')).toContainText('登录已过期', { timeout: 20_000 });
     await expect(page.locator('.navitem', { hasText: 'Still Here' })).toHaveCount(1);     // the library is still readable
 
     await admin({ disableUser: false });
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await expect(page.locator('#user-email')).toHaveValue(email);
     await page.fill('#user-pw', 'secret123');
     await page.click('.user-form button[type=submit]');
-    await expect(page.locator('#user')).toContainText('已同步', { timeout: 20_000 });
+    await expect(page.locator('#acct')).toContainText('已同步', { timeout: 20_000 });
     await expect(page.locator('.user-form')).toHaveCount(0);
   });
 
@@ -286,7 +291,8 @@ test.describe('with accounts turned on', () => {
     await page.keyboard.type('登录');
     await expect(page.locator('.cmdk-it b').first()).toContainText('登录 / 注册');
     await page.keyboard.press('Enter');
-    await expect(page.locator('.user-form .mtitle')).toHaveText('登录');
+    await expect(page.locator('.hub-tabs [data-tab="account"]')).toHaveClass(/on/);
+    await expect(page.locator('.user-form button[type=submit]')).toHaveText('登录');
     await page.keyboard.press('Escape');
     await signUp(page, email);
     await expect(page.locator('#viewpane')).toContainText('已登录 ' + email);
@@ -294,6 +300,32 @@ test.describe('with accounts turned on', () => {
     await page.keyboard.type('同步');
     await expect(page.locator('.cmdk-it b').first()).toContainText('立即同步');
     await page.keyboard.press('Escape');
+  });
+
+  test('one chip and one dialog cover the site account and the AI service', async ({ page }) => {
+    const email = newEmail();
+    await openApp(page);
+    await expect(page.locator('#acct .acct-chip')).toHaveCount(1);
+    await expect(page.locator('#acct')).toContainText('AI：免费翻译');
+    await page.click('#acct .user-chip');
+    await expect(page.locator('.hub-tabs button')).toHaveText(['账号', 'AI 服务']);
+    await page.fill('#user-email', email);                           // typed text survives a trip to the other tab
+    await page.click('.hub-tabs [data-tab="ai"]');
+    await expect(page.locator('#ptl-ak')).toBeVisible();
+    await page.fill('#ptl-ak', 'sk-ant-test-123');
+    await page.click('[data-a="ak"]');                               // connects (models.retrieve is mocked)
+    await expect(page.locator('#acct')).toContainText('AI：Anthropic');
+    await page.click('#acct .user-chip');
+    await expect(page.locator('#user-email')).toHaveValue('');       // a fresh dialog starts clean
+    await page.keyboard.press('Escape');
+    await signUp(page, email);
+    await expect(page.locator('#acct')).toContainText(email);
+    await expect(page.locator('#acct .chip-ai')).toHaveCount(1);
+    await page.click('#acct .user-chip');
+    await page.click('.hub-tabs [data-tab="ai"]');
+    await expect(page.locator('.hub-panel[data-tab="ai"]')).toContainText('Anthropic');
+    await page.click('.hub-tabs [data-tab="account"]');
+    await expect(page.locator('.hub-panel[data-tab="account"]')).toContainText('云端同步');
   });
 
   test('deleting the account removes its cloud records and signs the device out', async ({ page }) => {
@@ -306,19 +338,19 @@ test.describe('with accounts turned on', () => {
     const uid = await uidOf(page);
     expect((await cloudRecords(page.request, uid)).length).toBeGreaterThan(0);
 
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await page.locator('.user-form details.acct-more summary').click();
     await page.click('.user-form [data-a="todelete"]');
     await page.click('.user-form [data-a="delete"]');
     await expect(page.locator('.user-form .ferr')).toContainText('请输入“删除”');
     await page.fill('#user-confirm', '删除');
     await page.click('.user-form [data-a="delete"]');
-    await expect(page.locator('#user')).toContainText('登录 / 注册', { timeout: 20_000 });
+    await expect(page.locator('#acct')).toContainText('登录 / 注册', { timeout: 20_000 });
     expect(await cloudRecords(page.request, uid)).toEqual([]);
     expect(await navTitles(page)).toEqual([]);
 
     page.allowErrors(/Failed to load resource/);
-    await page.click('#user .user-chip');
+    await page.click('#acct .user-chip');
     await page.fill('#user-email', email);
     await page.fill('#user-pw', 'secret123');
     await page.click('.user-form button[type=submit]');

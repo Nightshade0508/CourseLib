@@ -25,7 +25,7 @@ function moreMenu(anchor){
   menu(anchor,[
     {icon:'type',label:'阅读设置',run:openTypo},
     {icon:'gear',label:'语音包管理',run:function(){ document.getElementById('vpopen').click(); }},
-    {icon:'key',label:'AI 账号',run:function(){ PTL.openAccount(); }},
+    {icon:'user',label:'账号与 AI 服务',run:function(){ if(PTL.accounts) PTL.openUser(); else PTL.openAccount(); }},
     {sep:1},
     {icon:'download',label:'导出备份',key:lastBackup().replace('上次备份：',''),run:exportBackup},
     {icon:'archive',label:'从备份恢复…',run:importBackup},

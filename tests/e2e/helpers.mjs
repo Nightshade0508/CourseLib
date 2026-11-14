@@ -111,7 +111,7 @@ export const newEmail = () => `reader-${Date.now().toString(36)}-${process.pid}-
 
 // Fill in the sign-in dialog; the page reloads into the account's library.
 export async function signUp(page, email, password = 'secret123', { merge } = {}) {
-  await page.click('#user .user-chip');
+  await page.click('#acct .user-chip');
   await page.click('.user-tabs [data-mode="up"]');
   await page.fill('#user-email', email);
   await page.fill('#user-pw', password);
@@ -120,14 +120,14 @@ export async function signUp(page, email, password = 'secret123', { merge } = {}
   await signedIn(page, email);
 }
 export async function signIn(page, email, password = 'secret123') {
-  await page.click('#user .user-chip');
+  await page.click('#acct .user-chip');
   await page.fill('#user-email', email);
   await page.fill('#user-pw', password);
   await page.click('.user-form button[type=submit]');
   await signedIn(page, email);
 }
 export async function signedIn(page, email) {
-  await expect(page.locator('#user .user-chip.on')).toContainText(email, { timeout: 20_000 });
+  await expect(page.locator('#acct .user-chip.on')).toContainText(email, { timeout: 20_000 });
   await page.waitForFunction(() => window.PTL && PTL.sync.state().phase === 'idle', null, { timeout: 20_000 });
 }
 // Upload this device's changes and fetch the account's, now (the page would do it by itself within a minute).
