@@ -11,8 +11,8 @@ import { syncSeg } from './motion.js';
 import { loadPdfData } from './doc-store.js';
 import { uploadPdf } from './upload.js';
 import { pdfBodyHtml } from './doc-render.js';
-import { SCHED, copyText, docMeta, pageFromMarker, toast } from './citations.js';
-import { flashBlock, fmtDate, todayISO } from './study.js';
+import { copyText, docMeta, pageFromMarker, toast } from './citations.js';
+import { flashBlock, todayISO } from './study.js';
 import { speakWord, vocab } from './vocab.js';
 import { progress } from './progress.js';
 import { openCmdk } from './palette.js';
@@ -29,17 +29,7 @@ export function renderView(id,pane){
 function vHead(title,zh,sub){
   return '<header class="dochead"><p class="eyebrow">'+esc(sub||'学习工具')+'</p><h1 class="dt">'+esc(title)+'</h1><p class="dz">'+esc(zh)+'</p></header>';
 }
-function weekOf(iso){
-  var s=new Date(SCHED.start+'T00:00:00'), d=new Date(iso+'T00:00:00');
-  return Math.floor((d-s)/(7*864e5))+1;
-}
 export function docExists(id){ return BUILTIN_DOCS.some(function(d){return d.id===id && !(placement[id]||{}).hidden;}) || !!userDocs[id]; }
-function lecDocs(L){
-  var out=[];
-  (L.r||[]).forEach(function(r){ if(r.doc&&docExists(r.doc)) out.push(r.doc); });
-  Object.keys(userDocs).forEach(function(k){ if(userDocs[k].lec===L.n && out.indexOf(k)<0) out.push(k); });
-  return out;
-}
 function progBar(id){
   var p=progress[id]||{}, pct=p.done?100:Math.round(p.pct||0);
   return '<span class="pbar" title="已读 '+pct+'%"><span style="width:'+pct+'%"></span></span><span class="pnum">'+(p.done?'已读完':pct+'%')+'</span>';
@@ -52,36 +42,6 @@ export function storageNote(){
   return '文档、标注和生词保存在这台设备的浏览器里，换设备或清除浏览器数据后不会保留，建议定期在侧栏「⋯ → 导出备份」。';
 }
 function viewHome(pane){
-  if(!SCHED.lectures.length) return viewWelcome(pane);
-  var today=todayISO(), wk=weekOf(today);
-  var lec=SCHED.lectures, upcoming=lec.filter(function(L){ return L.d>=today; }).slice(0,4);
-  var thisWeek=lec.filter(function(L){ return weekOf(L.d)===wk; });
-  var h=vHead('本周','Data C104 · 第 '+wk+' 周 · '+(SCHED.weeks[wk]||''),'Data C104 · Human Contexts and Ethics of Data');
-  h+='<div class="docbody vbody">';
-  h+='<h2>This week<span class="zh">本周课程与阅读</span></h2>';
-  h+=(thisWeek.length?thisWeek:upcoming).map(function(L){ return lecCard(L,today); }).join('');
-  var nxt=lec.filter(function(L){ return weekOf(L.d)===wk+1; });
-  if(nxt.length){ h+='<h2>Next week<span class="zh">下周预习 · 第 '+(wk+1)+' 周 · '+esc(SCHED.weeks[wk+1]||'')+'</span></h2>'+nxt.map(function(L){ return lecCard(L,today); }).join(''); }
-  // recently read
-  var rec=Object.keys(progress).filter(docExists).sort(function(a,b){ return (progress[b].at||0)-(progress[a].at||0); }).slice(0,6);
-  if(rec.length){
-    h+='<h2>Continue reading<span class="zh">最近在读</span></h2><ul class="v-list">'+rec.map(function(id){ var m=docMeta(id); return '<li><button type="button" class="v-doc" data-open="'+esc(id)+'"><span class="v-t">'+esc(m.title)+'</span>'+progBar(id)+'</button></li>'; }).join('')+'</ul>';
-  }
-  // vocab due
-  var due=Object.keys(vocab).filter(function(k){ return (vocab[k].due||0)<=Date.now(); }).length;
-  if(due) h+='<p class="v-tip"><button type="button" class="btn ghost sm" data-open="view:vocab">复习生词（'+due+' 个到期）</button></p>';
-  // full schedule
-  h+='<h2>Full schedule<span class="zh">全部课表</span></h2><div class="sched">';
-  var lastW=0;
-  lec.forEach(function(L){
-    if(L.w!==lastW){ h+='<div class="sch-w'+(L.w<wk?' past':'')+'">Week '+L.w+' · '+esc(SCHED.weeks[L.w]||'')+'</div>'; lastW=L.w; }
-    h+=lecRow(L,today);
-  });
-  h+='</div><p class="v-src">课表来自 bCourses Schedule（以 bCourses 为准，课程可能调整）。星号阅读 = 讨论课精读必读。</p></div>';
-  pane.innerHTML=h;
-  wireViewLinks(pane);
-}
-function viewWelcome(pane){
   var acct=window.PTL&&PTL.account&&PTL.account();
   var h=vHead('首页','中英对照阅读库 · 上传、翻译、精读','Parallel Text Library');
   h+='<div class="docbody vbody">';
@@ -104,29 +64,6 @@ function viewWelcome(pane){
   pane.innerHTML=h;
   wireViewLinks(pane);
   var ab=pane.querySelector('[data-acct]'); if(ab) ab.addEventListener('click',function(){ PTL.openAccount(); });
-}
-function lecCard(L,today){
-  var docs=lecDocs(L), past=L.d<today, isToday=L.d===today;
-  var h='<div class="lec'+(L.exam?' exam':'')+(past?' past':'')+(isToday?' today':'')+'"><div class="lec-h"><span class="lec-d">'+fmtDate(L.d)+' '+['日','一','二','三','四','五','六'][new Date(L.d+'T00:00:00').getDay()]+'</span>'+
-    '<span class="lec-t">'+(L.n?'L'+L.n+' · ':'')+esc(L.t)+'</span>'+(L.slides?'<a class="lec-sl" href="'+esc(L.slides)+'" target="_blank" rel="noopener">讲义 ↗</a>':'')+'</div>';
-  if(L.r&&L.r.length){
-    h+='<ul class="lec-r">'+L.r.map(function(r){
-      var has=r.doc&&docExists(r.doc);
-      var right=has?'<button type="button" class="v-doc sm" data-open="'+esc(r.doc)+'">打开 '+progBar(r.doc)+'</button>'
-        :(r.url?'<a class="lec-ext" href="'+esc(r.url)+'" target="_blank" rel="noopener">原文 ↗</a>':'')+(db?'<button type="button" class="btn ghost sm" data-up="'+L.n+'">上传 PDF</button>':'');
-      return '<li class="'+(r.req?'req':'opt')+'"><span class="lr-t">'+(r.req?'<b class="star" title="讨论课精读">*</b>':'')+esc(r.t)+(r.a?' <span class="lr-a">— '+esc(r.a)+'</span>':'')+'</span><span class="lr-act">'+right+'</span></li>';
-    }).join('')+'</ul>';
-  } else if(!L.exam) h+='<p class="lec-none">No new readings</p>';
-  var extra=Object.keys(userDocs).filter(function(k){ return userDocs[k].lec===L.n; });
-  if(extra.length) h+='<ul class="lec-r">'+extra.map(function(k){ return '<li><span class="lr-t">'+esc(userDocs[k].title)+' <span class="lr-a">— 已上传</span></span><span class="lr-act"><button type="button" class="v-doc sm" data-open="'+esc(k)+'">打开 '+progBar(k)+'</button></span></li>'; }).join('')+'</ul>';
-  return h+'</div>';
-}
-function lecRow(L,today){
-  var docs=lecDocs(L);
-  var req=(L.r||[]).filter(function(r){return r.req;}).map(function(r){return r.a||r.t;}).join('; ');
-  return '<div class="sch-row'+(L.d<today?' past':'')+(L.exam?' exam':'')+(L.d===today?' today':'')+'"><span class="sch-d">'+fmtDate(L.d)+'</span><span class="sch-t">'+(L.n?'L'+L.n+' ':'')+esc(L.t)+(req?'<span class="sch-r">'+esc(req)+'</span>':'')+'</span><span class="sch-a">'+
-    docs.map(function(id){ var p=progress[id]||{}; return '<button type="button" class="sch-doc'+(p.done?' done':'')+'" data-open="'+esc(id)+'" title="'+esc(docMeta(id).title)+'">'+(p.done?'✓':Math.round(p.pct||0)+'%')+'</button>'; }).join('')+
-    (L.slides?'<a class="sch-sl" href="'+esc(L.slides)+'" target="_blank" rel="noopener" title="讲义">讲义</a>':'')+'</span></div>';
 }
 function wireViewLinks(pane){
   [].slice.call(pane.querySelectorAll('[data-open]')).forEach(function(b){ b.addEventListener('click',function(){ show(b.dataset.open); }); });
@@ -349,7 +286,7 @@ export function navTools(){
 function navToolItems(wrap){
   var due=Object.keys(vocab).filter(function(k){ return (vocab[k].due||0)<=Date.now(); }).length;
   var nm=Object.keys(marks).filter(function(k){ return marks[k]&&marks[k].d; }).length;
-  [['view:home','home',SCHED.lectures.length?'本周':'首页',''],['view:notes','note','我的标注',nm?String(nm):''],['view:vocab','book','生词本',due?due+' 到期':(Object.keys(vocab).length?String(Object.keys(vocab).length):'')]].forEach(function(x){
+  [['view:home','home','首页',''],['view:notes','note','我的标注',nm?String(nm):''],['view:vocab','book','生词本',due?due+' 到期':(Object.keys(vocab).length?String(Object.keys(vocab).length):'')]].forEach(function(x){
     var b=el('button','tool-item'+(current===x[0]?' on':'')); b.type='button';
     b.innerHTML='<svg class="ic"><use href="#i-'+x[1]+'"></use></svg><span>'+x[2]+'</span>'+(x[3]?'<span class="ti-n">'+esc(x[3])+'</span>':'');
     b.addEventListener('click',function(){ show(x[0]); });

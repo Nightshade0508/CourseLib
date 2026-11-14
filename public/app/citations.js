@@ -1,34 +1,10 @@
-// Course schedule, bibliography, page labels and MLA citations.
+// Page labels and MLA citations.
 import './doc-render.js';
 import { el, esc, noop } from './util.js';
 import { BUILTIN_DOCS, db, placement, userDocs } from './state.js';
 import { curPane } from './annotations.js';
 import { getSample } from './pdf-extract.js';
 
-export var SCHED=window.__SCHED__||{lectures:[],weeks:{}};
-var BIB={
-  bowker:{a:'Bowker and Star',mla:'Bowker, Geoffrey C., and Susan Leigh Star. “The Case of Race Classification and Reclassification under Apartheid.” <i>Sorting Things Out: Classification and Its Consequences</i>, MIT Press, 1999, pp. 195–225.',off:194},
-  picciotto:{a:'Picciotto',mla:'Picciotto, Joanna. “Introduction.” <i>Labors of Innocence in Early Modern England</i>, Harvard UP, 2010.'},
-  wordsworth:{a:'Wordsworth',mla:'Wordsworth, William. <i>Selected Poems</i>. 1798–1824.',verse:true},
-  stein:{a:'Stein',mla:'Stein, Gertrude. <i>Tender Buttons: Objects, Food, Rooms</i>. Claire Marie, 1914.'},
-  scott:{a:'Scott',mla:'Scott, James C. “Nature and Space.” <i>Seeing Like a State: How Certain Schemes to Improve the Human Condition Have Failed</i>, Yale UP, 1998, pp. 11–33.'},
-  brooks:{a:'Brooks',mla:'Brooks, Andrew. “Why Are Certain Countries Poor? Dismantling Comparative Models of Development.” <i>Bullshit Comparisons</i>, Footnote Press, 2024.'},
-  nautilus:{a:'Clayton',mla:'Clayton, Aubrey. “How Eugenics Shaped Statistics.” <i>Nautilus</i>, 28 Oct. 2020.'},
-  collins:{a:'Collins and Pinch',mla:'Collins, Harry, and Trevor Pinch. “The Science of the Lambs: Chernobyl and the Cumbrian Sheep Farmers.” <i>The Golem at Large: What You Should Know about Technology</i>, Cambridge UP, 2002.'},
-  kuhn:{a:'Kuhn',mla:'Kuhn, Thomas S. <i>The Structure of Scientific Revolutions</i>. 2nd ed., U of Chicago P, 1970.'},
-  micrographia:{a:'Hooke',mla:'Hooke, Robert. <i>Micrographia</i>. London, 1665.'},
-  gross:{a:'Gross',mla:'Gross, Alan G. “Does Rhetoric of Science Matter? The Case of the Floppy-Eared Rabbits.” <i>College English</i>, vol. 53, no. 8, 1991, pp. 933–43.'},
-  white:{a:'White',mla:'White, Gilbert. <i>The Journals of Gilbert White</i>. Vol. 2, 1774–1783.'},
-  paterson:{a:'Williams',mla:'Williams, William Carlos. <i>Paterson</i>. Penguin.'},
-  cecire:{a:'Cecire',mla:'Cecire, Natalie. <i>Experimental: American Literature and the Aesthetics of Knowledge</i>. Johns Hopkins UP, 2019.'},
-  pressly:{a:'Pressly',mla:'Pressly, Lowry. “Introduction.” <i>The Right to Oblivion: Privacy and the Good Life</i>, Harvard UP, 2024, pp. 1–22.'},
-  malkin:{a:'Malkin',mla:'Malkin, Nathan. “Contextual Integrity, Explained: A More Usable Privacy Definition.” <i>IEEE Security &amp; Privacy</i>, vol. 21, no. 1, 2023, pp. 58–65.'},
-  porter:{a:'Porter',mla:'Porter, Theodore M. “Objectivity and Authority: How French Engineers Reduced Public Utility to Numbers.” <i>Poetics Today</i>, vol. 12, no. 2, 1991, pp. 245–65.'},
-  foucault:{a:'Foucault',mla:'Foucault, Michel. “Panopticism.” Translated by Alan Sheridan. <i>Race/Ethnicity: Multidisciplinary Global Contexts</i>, vol. 2, no. 1, 2008, pp. 1–12.'},
-  snail:{a:'Moore',mla:'Moore, Marianne. “To a Snail.” <i>Observations</i>, Dial Press, 1924.',verse:true},
-  crawford:{a:'Crawford',mla:'Crawford, Margo Natalie. “<i>Mood</i> Books: The Textual Production of Black Feeling.” <i>The Langston Hughes Review</i>, vol. 25, no. 2, 2019, pp. 162–78.'},
-  octopus:{a:'Moore',mla:'Moore, Marianne. “An Octopus.” <i>Observations</i>, Dial Press, 1924.',verse:true}
-};
 export function docMeta(id){
   var b=null; BUILTIN_DOCS.forEach(function(d){ if(d.id===id) b=d; });
   var pl=placement[id]||{}, u=userDocs[id];
@@ -39,17 +15,11 @@ export function docMeta(id){
   if(u) return {id:id,builtin:false,title:u.title,zh:u.zh||'',author:u.author||'',course:u.folder,u:u};
   return {id:id,title:id,author:'',course:''};
 }
-export function lectureOf(id){
-  var hit=null;
-  SCHED.lectures.forEach(function(L){ (L.r||[]).forEach(function(r){ if(r.doc===id) hit=L; }); });
-  var u=userDocs[id]; if(!hit && u && u.lec){ SCHED.lectures.forEach(function(L){ if(L.n===u.lec) hit=L; }); }
-  return hit;
-}
 /* page label for a .pg marker text */
 export function pageFromMarker(docId,txt){
   txt=String(txt||'');
   var m=/扫描件\s*第\s*(\d+)\s*页/.exec(txt);
-  if(m){ var off=(BIB[docId]||{}).off; return off!=null?{n:+m[1]+off}:{n:+m[1],scan:true}; }
+  if(m) return {n:+m[1],scan:true};
   m=/(?:原书|原刊|原文)\s*第\s*(\d+)\s*页/.exec(txt); if(m) return {n:+m[1]};
   m=/^Page\s+(\d+)/.exec(txt); if(m) return {n:+m[1]};
   m=/(?:PDF|课程 PDF)\s*第\s*(\d+)\s*页/.exec(txt); if(m) return {n:+m[1],scan:true};
@@ -96,7 +66,7 @@ export function docEnglish(pane,docId,maxChars){
 }
 /* MLA */
 export function inText(docId,loc){
-  var b=BIB[docId], u=userDocs[docId], a=b?b.a:((u&&u.citeA)||lastName(docMeta(docId).author)||docMeta(docId).title);
+  var u=userDocs[docId], a=(u&&u.citeA)||lastName(docMeta(docId).author)||docMeta(docId).title;
   if(loc&&loc.line) return '('+a+', line'+(loc.line2&&loc.line2!==loc.line?'s '+loc.line+'–'+loc.line2:' '+loc.line)+')';
   if(loc&&loc.page&&!loc.page.scan) return '('+a+' '+loc.page.n+(loc.page2&&loc.page2.n!==loc.page.n?'–'+loc.page2.n:'')+')';
   return '('+a+')';
@@ -106,7 +76,6 @@ function lastName(s){
   var p=s.split(/\s+/); return p[p.length-1];
 }
 export function worksCited(docId){
-  var b=BIB[docId]; if(b) return Promise.resolve(b.mla);
   var u=userDocs[docId]; if(!u) return Promise.resolve('');
   if(u.mla) return Promise.resolve(u.mla);
   return getSample().then(function(s){

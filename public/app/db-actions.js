@@ -8,11 +8,10 @@ import { renderNav } from './nav.js';
 import { show } from './show.js';
 import { closeModal, modal, mroot } from './modal.js';
 import { menu } from './menu.js';
-import { confirmBox, firstDocId, linkLecture, moveDocTo, nudgeDoc, renameBuiltin } from './organize.js';
+import { confirmBox, firstDocId, moveDocTo, nudgeDoc, renameBuiltin } from './organize.js';
 import { pdfJobs } from './pdf-extract.js';
 import { uploadPdf } from './upload.js';
 import { deletePdf, renamePdf } from './doc-render.js';
-import { SCHED } from './citations.js';
 import { startItemsJob, textItems } from './import-text.js';
 import { importUrl } from './import-url.js';
 import { aiRetranslate, defaultTier, openingWords } from './free-mt.js';
@@ -173,7 +172,6 @@ export function docMenu(d,anchor){
     }});
     menu(anchor,items); return;
   }
-  if(!d.builtin && ud && SCHED.lectures.length) items.push({label:'关联到 C104 讲次…',run:function(){ linkLecture(d); }});
   if(!d.builtin && ud && ud.format==='pdf'){
     items.unshift({label:'重命名',run:function(){renamePdf(d);}});
     if(ud.status!=='done' && ud.n && !(pdfJobs[d.id]&&pdfJobs[d.id].running)) items.push({label:'继续翻译',run:function(){ show(d.id); startTranslate(d.id); }});

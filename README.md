@@ -66,7 +66,7 @@
 
 ```bash
 npm run dev          # 构建公开版并在 http://localhost:8080 预览（不需要先 npm install）
-npm run dev:all      # 构建包含全部内置读物和课表的个人版
+npm run dev:all      # 构建包含全部内置读物的个人版（见下文「内置读物」）
 npm install          # 跑测试、或重新打包第三方库之前需要
 npm test             # 全部测试：单元测试 + 浏览器测试
 ```
@@ -104,7 +104,7 @@ public/                  网站本体，原样复制到 dist/
   pdfjs/                 PDF 文字提取
   kokoro/                Kokoro-82M v1.1 本地朗读模型（约 220 MB，访客按需下载）
 content/
-  library.json           内置文件夹、读物清单、课表；"public": true 的读物才会发布
+  library.json           内置文件夹和读物清单；"public": true 的才会发布
   docs/*.json            内置读物正文（已排好的中英对照 HTML；不提交到仓库）
 firebase/firestore.rules 云端数据库的安全规则（每个账号只能读写自己的内容）
 firebase.json            本地 Firebase 模拟器的配置（测试用）
@@ -127,11 +127,9 @@ scripts/
 
 ## 内置读物
 
-公开网站**不带任何示例读物**，只有一个空的「我的读物」文件夹，访客自己上传或粘贴文档。仓库里也不提交任何读物（`.gitignore` 忽略了 `content/docs/`），因为课程读物大多受版权保护。
+公开网站**不带任何示例读物**，只有一个空的「我的读物」文件夹，访客自己添加文档。仓库里也不提交任何读物（`.gitignore` 忽略了 `content/docs/`），因为课程读物大多受版权保护。
 
-`content/library.json` 仍然保留原来的课程文件夹、读物清单和课表，供个人版使用：把读物的 JSON 放进本地的 `content/docs/`，然后 `npm run dev:all`。构建时找不到的读物会自动跳过。
-
-课表（`schedule`）默认不发布；把 `includeSchedule` 改成 `true` 可以在公开版首页显示课表。
+如果想做一个自带读物的版本：在 `content/library.json` 的 `docs` 里登记读物，把对应的 JSON 放进本地的 `content/docs/`，然后 `npm run dev:all`。
 
 ## 部署
 

@@ -60,8 +60,7 @@ function kkB64(str){
   for(var i=0;i<n;i++) out[i]=bin.charCodeAt(i);
   return out;
 }
-export var ZHMAP=null, ZHLEX=null, ZHMAXW=1, zhDataP=null;
-export function setZHMAP(v){ return ZHMAP=v; }
+export var ZHLEX=null, ZHMAXW=1, zhDataP=null;
 export function setZHLEX(v){ return ZHLEX=v; }
 export function setZHMAXW(v){ return ZHMAXW=v; }
 export function setZhDataP(v){ return zhDataP=v; }

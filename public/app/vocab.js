@@ -81,7 +81,7 @@ function actLookup(){ var c0=selContext(); if(!c0||!c0.oneWord) return; lookupWo
   selbar.appendChild(sep);
   selbar.appendChild(mk('note','note','笔记','给这段加笔记'));
   selbar.appendChild(mk('look','book','查词','查这个词'));
-  selbar.appendChild(mk('explain','spark','解释','解释并联系课程概念'));
+  selbar.appendChild(mk('explain','spark','解释','解释这段话，并联系相关概念'));
   selbar.appendChild(mk('para','pen','改写','用自己的英文改写'));
   selbar.appendChild(mk('cite','quote','引用','复制 MLA 引用'));
   selbar.addEventListener('click',function(e){

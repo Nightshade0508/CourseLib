@@ -8,7 +8,6 @@ import {
 } from './annotations.js';
 import { copyText, docMeta, inText, lineOfNode, pageOfNode, toast, worksCited } from './citations.js';
 import { aiFootBtn, closeAiCard, openAiCard, streamInto } from './ai-card.js';
-import { courseContext } from './study.js';
 
 export function selContext(){
   var sel=getSelection(); if(!sel.rangeCount||sel.isCollapsed) return null;
@@ -24,10 +23,10 @@ export function selContext(){
 }
 export function actExplain(){
   var c0=selContext(); if(!c0) return;
-  var m=docMeta(current), card=openAiCard('解释 · 联系课程',c0.rect); hideSelbar();
-  var prompt='A UC Berkeley student is reading "'+m.title+'"'+(m.author?' by '+m.author:'')+' and selected a passage. '+courseContext(current)+'\n\n'+
+  var m=docMeta(current), card=openAiCard('解释',c0.rect); hideSelbar();
+  var prompt='A university student is reading "'+m.title+'"'+(m.author?' by '+m.author:'')+' and selected a passage.\n\n'+
     'Selected: "'+c0.text+'"\nSurrounding paragraph: "'+c0.para.slice(0,2500)+'"'+(c0.paraZh?'\n(Chinese translation of the paragraph: '+c0.paraZh.slice(0,1200)+')':'')+'\n\n'+
-    'Answer in this format (markdown, concise, no preamble):\n**What it says** — 2–3 sentences in plain academic English.\n**Why it matters** — how it fits the author\'s argument.\n**Course links** — 1–3 bullets tying it to course concepts or other readings (only real connections).\n**中文要点** — 一两句中文概括。';
+    'Answer in this format (markdown, concise, no preamble):\n**What it says** — 2–3 sentences in plain academic English.\n**Why it matters** — how it fits the author\'s argument.\n**Connections** — 1–3 bullets linking it to the larger debate, key concepts, or related thinkers (only real connections).\n**中文要点** — 一两句中文概括。';
   streamInto(card,prompt,{modelTier:'quick',cache:false}).then(function(t){
     aiFootBtn(card,'复制',function(){ copyText(t).then(function(){toast('已复制');}); });
   }).catch(noop);

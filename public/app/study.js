@@ -4,21 +4,10 @@ import { el, esc, lsGet, lsSet, noop } from './util.js';
 import { current, db } from './state.js';
 import { curPane, getBlocks } from './annotations.js';
 import { getSample } from './pdf-extract.js';
-import { SCHED, copyText, docEnglish, docMeta, lectureOf, sampleErr, toast } from './citations.js';
+import { copyText, docEnglish, docMeta, sampleErr, toast } from './citations.js';
 import { progress } from './progress.js';
 
 var studyCache={}, studyBusy={};
-export function courseContext(docId){
-  var m=docMeta(docId);
-  if(m.course==='c104'){
-    var L=lectureOf(docId);
-    return 'Course: Data C104 "Human Contexts and Ethics of Data" (UC Berkeley). Course tools: power, sociotechnical systems, positionality, representation, performativity, co-production, agency. '+
-      (L?'This reading is assigned for Lecture '+L.n+' "'+L.t+'" (week '+L.w+': '+(SCHED.weeks[L.w]||'')+').':'')+
-      ' Lecture topics so far: '+SCHED.lectures.filter(function(x){return x.n&&x.d<=todayISO();}).map(function(x){return x.t;}).join('; ')+'.';
-  }
-  if(m.course==='r1b') return 'Course: English R1B "Reading and Composition" (UC Berkeley) — close reading, rhetoric, and argumentative essay writing about literature and science writing.';
-  return '';
-}
 export function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 export function docHeadActions(pane,id){
   var head=pane.querySelector('.dochead'); if(!head) return;
@@ -28,8 +17,6 @@ export function docHeadActions(pane,id){
   b.innerHTML='<svg class="ic"><use href="#i-spark"></use></svg><span>学习卡片</span>';
   b.addEventListener('click',function(){ toggleStudy(id); });
   row.appendChild(b);
-  var L=lectureOf(id);
-  if(L){ var t=el('span','da-lec','Lecture '+L.n+' · '+fmtDate(L.d)+' · '+L.t); row.appendChild(t); }
   var p=progress[id];
   if(p){ var s=el('span','da-prog',p.done?'已读完':('已读 '+Math.round(p.pct||0)+'%')); row.appendChild(s); }
   head.appendChild(row);
@@ -66,7 +53,7 @@ function genStudy(id,refresh){
   if(full.length<200){ renderStudyMsg(id,'这篇的英文内容太少，无法生成学习卡片。'); return; }
   studyBusy[id]=true;
   renderStudyMsg(id,'AI 正在通读全文并整理要点（约 1 分钟）…',true);
-  var m=docMeta(id), ctx=courseContext(id);
+  var m=docMeta(id), ctx='';
   getSample().then(function(s){
     if(!s) throw {code:'no_sample'};
     var chunks=[]; var CH=42000;
@@ -84,7 +71,7 @@ function genStudy(id,refresh){
       })();
     }
     return notesP.then(function(material){
-      var prompt='You are helping a UC Berkeley student prepare for discussion sections and exams. The readings are the main exam material. Build a study card for this reading in clear academic English (with short Chinese glosses only where asked).\n'+
+      var prompt='You are helping a university student prepare for seminar discussion and exams on this reading. Build a study card for this reading in clear academic English (with short Chinese glosses only where asked).\n'+
         ctx+'\nReading: "'+m.title+'"'+(m.author?' by '+m.author:'')+'\n'+
         'Page tags like [p. 252] mark printed pages ([p. 4*] = scan page, not a printed page number).\n\n'+
         'Reply with only JSON, exactly this shape:\n'+
@@ -92,7 +79,7 @@ function genStudy(id,refresh){
         ' "args": [{"en": "a main argument or move, 1–2 sentences", "page": "252" }],   // 5–8 items, in the order of the text\n'+
         ' "terms": [{"term": "key term", "zh": "中文译名", "def": "what it means in this reading, 1 sentence"}],   // 5–10 items\n'+
         ' "quotes": [{"q": "verbatim quote copied exactly from the text, under 30 words", "page": "252", "why": "why it matters, 1 sentence"}],   // 4–6 items\n'+
-        ' "links": ["how this reading connects to a course concept or another lecture, 1 sentence"],   // 2–4 items\n'+
+        ' "links": ["how this reading connects to a key concept, debate or another well-known work, 1 sentence"],   // 2–4 items\n'+
         ' "questions": ["a likely discussion / warm-up question"]   // 3 items\n}\n'+
         'Use "" for a page you cannot tell. Quotes must be copied exactly, never paraphrased.\n\nTEXT:\n'+material;
       if(prompt.length>60000) prompt=prompt.slice(0,60000);
@@ -127,7 +114,7 @@ function renderStudy(id){
   if(o.args.length) h+='<div class="st-block"><h3>Main arguments</h3><ol class="st-args">'+o.args.map(function(a){ return '<li>'+esc(a.en)+(a.page?' <span class="st-pg">p. '+esc(a.page)+'</span>':'')+'</li>'; }).join('')+'</ol></div>';
   if(o.terms.length) h+='<div class="st-block"><h3>Key terms</h3><dl class="st-terms">'+o.terms.map(function(t){ return '<div><dt>'+esc(t.term)+(t.zh?' <span class="st-zh">'+esc(t.zh)+'</span>':'')+'</dt><dd>'+esc(t.def)+'</dd></div>'; }).join('')+'</dl></div>';
   if(o.quotes.length) h+='<div class="st-block"><h3>Key quotes</h3><ul class="st-quotes">'+o.quotes.map(function(q,i){ return '<li><button type="button" class="st-q" data-qi="'+i+'" title="'+(q.ok?'跳到原文':'原文中未找到完全一致的句子')+'">“'+esc(q.q)+'”</button>'+(q.page?' <span class="st-pg">p. '+esc(q.page)+'</span>':'')+(q.ok===false?' <span class="st-warn">未在原文中核对到</span>':'')+(q.why?'<span class="st-why">'+esc(q.why)+'</span>':'')+'</li>'; }).join('')+'</ul></div>';
-  if(o.links&&o.links.length) h+='<div class="st-block"><h3>Course links</h3><ul class="st-links">'+o.links.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>';
+  if(o.links&&o.links.length) h+='<div class="st-block"><h3>Connections</h3><ul class="st-links">'+o.links.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>';
   if(o.questions&&o.questions.length) h+='<div class="st-block"><h3>Discussion questions</h3><ol class="st-qs">'+o.questions.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ol></div>';
   h+='<p class="st-meta">由 AI 生成 · '+esc((o.at||'').slice(0,10))+' · 引文已与原文自动核对，页码以原书为准</p>';
   sec.innerHTML=h;
@@ -142,7 +129,7 @@ function studyMd(id){
   var s='# '+m.title+(m.author?' — '+m.author:'')+'\n\n## Thesis\n'+o.thesis+(o.thesis_zh?'\n\n'+o.thesis_zh:'')+'\n\n## Main arguments\n'+o.args.map(function(a,i){return (i+1)+'. '+a.en+(a.page?' (p. '+a.page+')':'');}).join('\n')+
     '\n\n## Key terms\n'+o.terms.map(function(t){return '- **'+t.term+'**'+(t.zh?'（'+t.zh+'）':'')+': '+t.def;}).join('\n')+
     '\n\n## Key quotes\n'+o.quotes.map(function(q){return '- “'+q.q+'”'+(q.page?' (p. '+q.page+')':'')+(q.why?' — '+q.why:'');}).join('\n');
-  if(o.links&&o.links.length) s+='\n\n## Course links\n'+o.links.map(function(x){return '- '+x;}).join('\n');
+  if(o.links&&o.links.length) s+='\n\n## Connections\n'+o.links.map(function(x){return '- '+x;}).join('\n');
   if(o.questions&&o.questions.length) s+='\n\n## Discussion questions\n'+o.questions.map(function(x,i){return (i+1)+'. '+x;}).join('\n');
   return s+'\n';
 }

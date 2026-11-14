@@ -3,7 +3,7 @@ import './downloads.js';
 import { el, esc, lsGet, lsSet, noop } from './util.js';
 import { closeModal, mroot } from './modal.js';
 import { fillVoices, status, tts } from './tts.js';
-import { KK, kkFetch, kkUrl, setZHLEX, setZHMAP, setZHMAXW, setZhDataP, zhDataP } from './kokoro.js';
+import { KK, kkFetch, kkUrl, setZHLEX, setZHMAXW, setZhDataP, zhDataP } from './kokoro.js';
 import {
   DM, MB, dmCancel, dmDelete, dmDownload, dmHave, dmPct, dmScan, kkPreview, kkStopPreview,
 } from './downloads.js';
@@ -95,13 +95,12 @@ document.getElementById('plsettings').addEventListener('click',openVoicePanel);
 export function kkZhData(){
   if(zhDataP) return zhDataP;
   var dec=function(b){ return new TextDecoder().decode(b); };
-  setZhDataP(dmDownload('zh').then(function(){ return Promise.all([
-    kkFetch(kkUrl('kokoro/zh-phonemes.json'),noop,{raw:true}).then(function(b){ setZHMAP(JSON.parse(dec(b))); }),
-    kkFetch(kkUrl('kokoro/lexicon-zh.txt'),noop,{raw:true}).then(dec).then(function(t){
+  setZhDataP(dmDownload('zh').then(function(){
+    return kkFetch(kkUrl('kokoro/lexicon-zh.txt'),noop,{raw:true}).then(dec).then(function(t){
       var lex=Object.create(null), max=1;
       t.split('\n').forEach(function(line){ var sp=line.indexOf(' '); if(sp<1) return; var w=line.slice(0,sp); lex[w]=line.slice(sp+1).replace(/\s+/g,''); if(w.length>max) max=w.length; });
       setZHLEX(lex); setZHMAXW(Math.min(max,8));
-    })
-  ]); }).catch(function(e){ setZhDataP(null); throw e; }));
+    });
+  }).catch(function(e){ setZhDataP(null); throw e; }));
   return zhDataP;
 }

@@ -7,15 +7,14 @@ import {
   stopTick, synth, sysSpeakAt, t0, tts, ttsPaint,
 } from './tts.js';
 import {
-  JD, KK, KVOCAB, ZHLEX, ZHMAP, ZHMAXW, kkAvailable, kkFetchSet, kkSets, kkUrl, kkVoice, lowPower,
+  JD, KK, KVOCAB, ZHLEX, ZHMAXW, kkAvailable, kkFetchSet, kkSets, kkUrl, kkVoice, lowPower,
 } from './kokoro.js';
 import { DM, KC, dmDownload, dmNotify, dmSettle, kkIsAbort } from './downloads.js';
 import { kkZhData } from './voice-panel.js';
 import { ttsHalt } from './player.js';
 
-// Chinese text → Kokoro v1.1 phonemes: precomputed for the library's readings, dictionary lookup for anything else
+// Chinese text → Kokoro v1.1 phonemes, by dictionary lookup
 function zhPhonemes(text){
-  if(ZHMAP&&ZHMAP[text]!=null) return ZHMAP[text];
   if(!ZHLEX) return '';
   var t=text.replace(/[、，]/g,', ').replace(/[。．]/g,'. ').replace(/！/g,'! ').replace(/：/g,': ').replace(/；/g,'; ').replace(/？/g,'? ')
     .replace(/[«《「【]/g,' “').replace(/[»》」】]/g,'” ').replace(/（/g,' (').replace(/）/g,') ');

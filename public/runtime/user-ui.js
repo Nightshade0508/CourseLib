@@ -3,7 +3,7 @@ import './sync.js';
 import { esc, noop } from './util.js';
 import { adoptGuest, dropLocal, guestSummary, reloadAllTabs, setLocalUser, user } from './db.js';
 import {
-  authErr, cloud, cloudOn, deleteAccount, onUser, resendVerification, resetPassword, signIn, signInGoogle,
+  authErr, cloud, cloudOn, deleteAccount, resendVerification, resetPassword, signIn, signInGoogle,
   signOutCloud, signUp,
 } from './cloud.js';
 import { onSync, startSync, syncNow, syncState } from './sync.js';

@@ -2,7 +2,7 @@
 import './kokoro.js';
 import { noop } from './util.js';
 import { status, tts } from './tts.js';
-import { KK, KVOICES, kkFetch, kkUrl, setZHLEX, setZHMAP, setZhDataP } from './kokoro.js';
+import { KK, KVOICES, kkFetch, kkUrl, setZHLEX, setZhDataP } from './kokoro.js';
 import { kkZhData } from './voice-panel.js';
 import { kkCtx, kkLoad, kkPump } from './kokoro-engine.js';
 import { pause, ttsHalt } from './player.js';
@@ -15,7 +15,7 @@ export var DM={items:[],byId:{},est:null,persisted:null,raf:0,listeners:[]};
   model.push(['kokoro/ort/wasm.part0.txt',14666668],['kokoro/ort/wasm.part1.txt',14128028]);
   var items=[
     {id:'engine',group:'core',name:'语音引擎',desc:'Kokoro-82M v1.1 神经网络模型与运行库，中英文共用',files:dmFiles(model)},
-    {id:'zh',group:'core',name:'中文发音数据',desc:'为文库读物预先生成的读音表，以及中文词典',files:dmFiles([['kokoro/zh-phonemes.json',1680547,1],['kokoro/lexicon-zh.txt',2119465,1]])}
+    {id:'zh',group:'core',name:'中文发音数据',desc:'中文词典，用来把汉字转成读音',files:dmFiles([['kokoro/lexicon-zh.txt',2119465,1]])}
   ];
   KVOICES.zf.concat(KVOICES.zm).forEach(function(v){ items.push({id:'v:'+v[0],group:'zh',voice:v[0],lang:'zh',name:v[1],desc:'中文旁白',files:dmFiles([['kokoro/voices11/'+v[0]+'.txt',696320]])}); });
   KVOICES.en.forEach(function(v){ items.push({id:'v:'+v[0],group:'en',voice:v[0],lang:'en',name:v[1]+' · '+v[2],desc:'英文旁白',files:dmFiles([['kokoro/voices11/'+v[0]+'.txt',696320]])}); });
@@ -67,7 +67,7 @@ export async function dmDelete(id){
   try{ var cache=await caches.open(KC); for(var i=0;i<it.files.length;i++) await cache.delete(it.files[i].url); }catch(e){}
   it.files.forEach(function(f){ f.cached=false; f.got=0; }); it.err=null; dmSettle(it);
   if(id==='engine') kkUnload();
-  if(id==='zh'){ setZHMAP(null); setZHLEX(null); setZhDataP(null); }
+  if(id==='zh'){ setZHLEX(null); setZhDataP(null); }
   dmNotify(); refreshStorage();
 }
 function refreshStorage(){ try{ if(navigator.storage&&navigator.storage.estimate) navigator.storage.estimate().then(function(e){ DM.est=e; dmNotify(); }); }catch(e){} }

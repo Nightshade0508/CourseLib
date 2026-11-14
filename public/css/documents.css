@@ -46,7 +46,7 @@
 .doc-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:4px;font-family:var(--f-ui);font-size:12px;color:var(--muted)}
 .doc-actions .btn{display:inline-flex;align-items:center;gap:6px}
 .doc-actions .btn .ic{width:15px;height:15px}
-.da-lec,.da-prog{font-variant-numeric:tabular-nums}
+.da-prog{font-variant-numeric:tabular-nums}
 .doc-end{display:flex;align-items:center;justify-content:center;gap:14px;margin:72px 0 24px;padding-top:28px;border-top:1px solid var(--rule);font-family:var(--f-ui);font-size:13px;color:var(--muted)}
 .doc-loading{padding:80px 0;text-align:center}
 

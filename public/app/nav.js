@@ -5,8 +5,6 @@ import { current, db, docsIn, folderList } from './state.js';
 import { show } from './show.js';
 import { docMenu, folderMenu } from './db-actions.js';
 import { dndFolder, dndItem, dragId, setNavDirty } from './organize.js';
-import { lectureOf } from './citations.js';
-import { fmtDate } from './study.js';
 import { navTools } from './views.js';
 import { progress } from './progress.js';
 
@@ -48,8 +46,7 @@ export function renderNav(){
       var li=el('li',''); li.style.setProperty('--i',Math.min(ix,10));
       var b=el('button','navitem'+(d.id===current?' on':'')); b.type='button'; b.dataset.doc=d.id;
       b.appendChild(el('span','ni-t',d.title));
-      var Lc=lectureOf(d.id), zl=(Lc?'L'+Lc.n+' · '+fmtDate(Lc.d)+(d.zh?' · ':''):'')+(d.zh||'');
-      if(zl) b.appendChild(el('span','ni-z',zl));
+      if(d.zh) b.appendChild(el('span','ni-z',d.zh));
       var pg0=progress[d.id]; if(pg0){ var pb=el('span','ni-p'+(pg0.done?' done':'')); var pbi=el('span',''); pbi.style.width=(pg0.done?100:pg0.pct||0)+'%'; pb.appendChild(pbi); b.appendChild(pb); }
       b.addEventListener('click',function(){show(d.id);});
       li.appendChild(b);

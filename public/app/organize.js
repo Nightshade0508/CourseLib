@@ -5,8 +5,6 @@ import { BUILTIN_DOCS, current, db, docsIn, folderList, placement, userDocs } fr
 import { navRoot, renderNav } from './nav.js';
 import { show } from './show.js';
 import { modal, mroot } from './modal.js';
-import { SCHED } from './citations.js';
-import { fmtDate } from './study.js';
 
 export var dragId=null, navDirty=false;
 export function setNavDirty(v){ return navDirty=v; }
@@ -36,14 +34,6 @@ export function renameBuiltin(d){
     placement[d.id]=np; renderNav(); applyBuiltinHead(d.id);
     return db.doc('placement/'+d.id).set(np);
   });
-}
-export function linkLecture(d){
-  var opts=[{value:'0',label:'（不关联）'}].concat(SCHED.lectures.filter(function(L){return L.n;}).map(function(L){ return {value:String(L.n),label:'L'+L.n+' · '+fmtDate(L.d)+' · '+L.t}; }));
-  modal('关联到 Data C104 讲次',[{name:'lec',label:'讲次',type:'select',options:opts}],function(v){
-    var n=+v.lec; if(userDocs[d.id]) userDocs[d.id].lec=n||null;
-    return db.doc('docs/'+d.id).update({lec:n||null}).then(function(){ renderNav(); });
-  },'保存');
-  var s=mroot.querySelector('#f-lec'); if(s) s.value=String((userDocs[d.id]||{}).lec||0);
 }
 export function confirmBox(title,msg,label,fn){
   modal(title,[],function(){ return Promise.resolve(fn()).then(function(){ return true; }); },label);
