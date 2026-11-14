@@ -19,10 +19,6 @@ export function getBlocks(pane){
   leaf.forEach(function(n,i){ n.setAttribute('data-bi',i); });
   pane._blocks=leaf; pane._blocksBody=body; return leaf;
 }
-function blockOf(node){
-  var e=node&&(node.nodeType===1?node:node.parentElement);
-  return e?e.closest('[data-bi]'):null;
-}
 export function offsetIn(block,node,off){
   var r=document.createRange(); r.setStart(block,0);
   try{ r.setEnd(node,off); }catch(e){ return 0; }

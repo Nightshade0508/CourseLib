@@ -75,7 +75,6 @@ export function actNote(){
     saveLocal(); renderMarks(); return true;
   },'保存笔记');
 }
-function noteAt(id){ return marks[id]; }
 function openNoteCard(span){
   var mid=span.getAttribute('data-mid'), m=marks[mid]; if(!m) return;
   var card=openAiCard('笔记',span.getBoundingClientRect()), body=card.querySelector('.ai-body');

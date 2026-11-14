@@ -23,7 +23,6 @@ export function docHeadActions(pane,id){
   // show stored study section if it was open
   if(studyCache[id]&&lsGet('study-open:'+id,'0')==='1') renderStudy(id);
 }
-export function fmtDate(iso){ var p=iso.split('-'); return (+p[1])+'/'+(+p[2]); }
 function toggleStudy(id){
   var pane=curPane(); if(!pane) return;
   var sec=pane.querySelector('.study');

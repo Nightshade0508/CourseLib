@@ -17,7 +17,6 @@ import { afterShow } from './import-text.js';
 
 var keepScrollOnce=false;
 export function setKeepScrollOnce(v){ return keepScrollOnce=v; }   // set right before show() to keep the scroll position once
-var main=document.getElementById('reader');
 function findFolder(fid){
   var l=folderList(); for(var i=0;i<l.length;i++) if(l[i].id===fid) return l[i];
   return {code:'',name:''};

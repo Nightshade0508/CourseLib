@@ -22,7 +22,7 @@ export function voiceSel(){
 export function useKokoro(){ return voiceSel().indexOf('kokoro:')===0; }
 export function kkVoice(){ return voiceSel().slice(7); }
 export function kkUrl(p){ return new URL(p,document.baseURI).href; }
-export var JD='https://cdn.jsdelivr.net/npm/', KSIZE=190044304+28794696;
+export var JD='https://cdn.jsdelivr.net/npm/';
 export function kkSets(){
   return {
     model:[[0,1,2,3,4,5,6,7,8,9,10,11,12].map(function(i){ return kkUrl('kokoro/model11/model.part'+i+'.txt'); })],

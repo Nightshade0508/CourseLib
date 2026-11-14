@@ -3,7 +3,7 @@
 //   - every file parses as a module
 //   - every imported name is exported by the file it is imported from
 //   - no file uses a name that is neither declared, imported, nor a browser global
-//   - no file assigns to an imported name (imports are read-only; use the exported setter)
+//   - no file assigns to an imported name (imports are read-only; use the exported setter), or imports one it never uses
 //   - the app's files, and the runtime's, each form one load-order chain (see public/app/main.js)
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -57,7 +57,7 @@ test('every imported name exists in the file it comes from', () => {
   assert.deepEqual(bad, []);
 });
 
-test('no undeclared names and no assignment to imports', () => {
+test('no undeclared names, no assignment to imports, no unused imports', () => {
   const bad = [];
   for (const [f, m] of mods) {
     const sm = analyze(m.ast, { ecmaVersion: 2022, sourceType: 'module' });
@@ -70,6 +70,7 @@ test('no undeclared names and no assignment to imports', () => {
     for (const v of moduleScope.variables) {
       if (!v.defs.some((d) => d.type === 'ImportBinding')) continue;
       for (const r of v.references) if (r.isWrite()) bad.push(`${rel(f)}:${r.identifier.loc.start.line} assigns to "${v.name}", which is imported (use its setter)`);
+      if (!v.references.length) bad.push(`${rel(f)}: imports "${v.name}" but never uses it`);
     }
   }
   assert.deepEqual(bad, []);
