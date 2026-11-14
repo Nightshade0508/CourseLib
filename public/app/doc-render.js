@@ -16,7 +16,7 @@ var pdfSub=null, pdfSubId=null;   // live subscription to the open document's ch
 // where the document came from, as small labels under its title (a web article links back to its page)
 function srcChips(d){
   var src=d.src||{}, safe=/^https?:\/\//i.test(src.url||'');
-  return '<span class="chip">'+({docx:'上传的 Word',paste:'粘贴的文本',url:'网页文章'}[src.kind]||'上传的 PDF')+'</span>'+
+  return '<span class="chip">'+({docx:'上传的 Word',paste:'粘贴的文本',url:'网页文章',text:'上传的文本'}[src.kind]||'上传的 PDF')+'</span>'+
     (src.kind==='url'&&safe?'<a class="chip chip-link" href="'+esc(src.url)+'" target="_blank" rel="noopener noreferrer">'+esc(src.site||'原文')+' ↗</a>':'')+
     (src.pages?'<span class="chip">原文 '+src.pages+' 页</span>':'')+(src.scanned?'<span class="chip">扫描版 · AI 识别</span>':'')+
     '<span class="chip">逐段对照 · '+(d.tier==='free'?'免费翻译':'AI 翻译')+'</span>';

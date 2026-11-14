@@ -30,8 +30,11 @@
 .btn.danger{color:var(--danger);border-color:currentColor}
 
 /* ---------- the account dialog: 账号 | AI 服务 ---------- */
-.hub{padding-top:14px}
-.hub-tabs{position:relative;display:flex;gap:22px;margin:0 0 18px;border-bottom:1px solid var(--rule);font-family:var(--f-ui)}
+.hub{padding-top:16px}
+.hub-tabs{position:relative;display:flex;gap:24px;margin:0 28px;border-bottom:1px solid var(--rule);font-family:var(--f-ui)}
+.hub-tabs[hidden]+.hub-panel .mform,.hub-tabs[hidden]~.hub-panel .mform{padding-top:12px}
+/* in the 账号 tab the 登录 / 注册 switch is the heading */
+.hub-panel .user-signin>.mtitle{display:none}
 .hub-tabs button{border:0;background:none;padding:6px 0 12px;font-size:14px;color:var(--muted);cursor:pointer;transition:color .18s var(--ease)}
 .hub-tabs button:hover{color:var(--ink-2)}
 .hub-tabs button.on{color:var(--ink);font-weight:600}

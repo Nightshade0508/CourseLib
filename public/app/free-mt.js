@@ -1,5 +1,5 @@
 // Free translation and dictionary that need no account.
-import './import-url.js';
+import './add-doc.js';
 import { noop } from './util.js';
 import { userDocs } from './state.js';
 import { show } from './show.js';

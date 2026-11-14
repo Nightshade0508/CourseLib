@@ -1,4 +1,4 @@
-import { test, expect, openApp, mockAI, signInAI, fakeBrowserTranslator, zh, en, waitTranslated } from './helpers.mjs';
+import { test, expect, openApp, openAdd, mockAI, signInAI, fakeBrowserTranslator, zh, en, waitTranslated } from './helpers.mjs';
 import { makePng } from './fixtures.mjs';
 
 const ARTICLE = {
@@ -30,9 +30,7 @@ async function mockReader(page, answer = { status: 200, body: { code: 200, statu
   return seen;
 }
 async function openUrlDialog(page) {
-  await page.click('#newbtn');
-  await page.locator('.pop-item', { hasText: '从网址导入' }).click();
-  await expect(page.locator('#modal .mtitle')).toHaveText('从网址导入');
+  await openAdd(page, 'url');
 }
 
 test('an article is imported from its address with pictures, translated for free, and links back to its page', async ({ page }) => {
@@ -101,7 +99,7 @@ test('with an AI account the page title goes into the naming step and the text i
   await mockReader(page);
   await openApp(page);
   await page.keyboard.press('Control+k');
-  await page.keyboard.type('网址');
+  await page.keyboard.type('添加文档 · 网址');
   await page.keyboard.press('Enter');
   await page.locator('#f-url').fill('https://review.example.org/numbers-trust');
   await page.locator('#modal .btn.primary').click();
@@ -139,14 +137,13 @@ test('pages that cannot be read explain why and leave the dialog open', async ({
   await expect(page.locator('.navitem')).toHaveCount(0);                    // nothing half-made was added to the library
 });
 
-test('pasting only a web address into 粘贴文章 switches to importing that page', async ({ page }) => {
+test('pasting only a web address into 粘贴文本 switches to importing that page', async ({ page }) => {
   await fakeBrowserTranslator(page);
   await mockReader(page);
   await openApp(page);
-  await page.click('#newbtn');
-  await page.locator('.pop-item', { hasText: '粘贴文章' }).click();
+  await openAdd(page, 'paste');
   await page.locator('#f-body').fill('https://review.example.org/numbers-trust');
   await page.locator('#modal .btn.primary').click();
-  await expect(page.locator('#modal .mtitle')).toHaveText('从网址导入');
+  await expect(page.locator('.add-tab.on')).toHaveAttribute('data-tab', 'url');
   await expect(page.locator('#f-url')).toHaveValue('https://review.example.org/numbers-trust');
 });

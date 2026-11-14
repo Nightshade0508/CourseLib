@@ -11,6 +11,7 @@ import { docHeadActions } from './study.js';
 import { docEnd, trackProgress } from './progress.js';
 import { paraTools } from './para-tools.js';
 import { readyToTranslate } from './estimate.js';
+import { markdownBlocks } from './lib/article.js';
 
 var mammothP=null;
 function loadMammoth(){
@@ -25,14 +26,26 @@ function loadMammoth(){
 export function docxItems(file){
   return loadMammoth().then(function(m){ return file.arrayBuffer().then(function(buf){ return m.convertToHtml({arrayBuffer:buf}); }); }).then(function(r){
     var t=document.createElement('template'); t.innerHTML=r.value;
-    var blocks=[];
-    [].slice.call(t.content.querySelectorAll('h1,h2,h3,h4,p,li,blockquote')).forEach(function(n){
-      if(n.closest('li')&&n.tagName!=='LI') return;
-      var txt=n.textContent.replace(/\s+/g,' ').trim(); if(!txt) return;
-      blocks.push({k:/^H/.test(n.tagName)?'h':'p',p:1,en:txt});
-    });
-    return finishBlocks(blocks).filter(function(it){ return it.k!=='pg'; });
+    return htmlItems(t.content);
   });
+}
+// .txt / .md / .html file → paragraphs
+export function fileTextItems(file){
+  return file.text().then(function(t){
+    if(/\.(md|markdown)$/i.test(file.name)) return finishBlocks(markdownBlocks(t).map(function(b){ return {k:b.k,p:1,en:b.en}; }),{explicit:true}).filter(function(it){ return it.k!=='pg'; });
+    if(/\.html?$/i.test(file.name)) return htmlItems(new DOMParser().parseFromString(t,'text/html').body);
+    return textItems(t);
+  });
+}
+function htmlItems(root){
+  var blocks=[];
+  [].slice.call(root.querySelectorAll('h1,h2,h3,h4,p,li,blockquote')).forEach(function(n){
+    if(n.closest('li')&&n.tagName!=='LI') return;
+    if(n.closest('nav,header,footer,aside,script,style')) return;
+    var txt=n.textContent.replace(/\s+/g,' ').trim(); if(!txt) return;
+    blocks.push({k:/^H/.test(n.tagName)?'h':'p',p:1,en:txt});
+  });
+  return finishBlocks(blocks,{explicit:true}).filter(function(it){ return it.k!=='pg'; });
 }
 export function textItems(text){
   var paras=String(text||'').replace(/\r/g,'').split(/\n\s*\n/);

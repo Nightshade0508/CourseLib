@@ -172,7 +172,7 @@ export function finishBlocks(blocks,opts){
     if(b.k==='p' && last && last.k==='p' && last.p<b.p && !END_RE.test(last.en) && /^[a-z(“"']/.test(b.en)){
       last.en=joinLine(last.en,b.en); return;
     }
-    if(b.k==='h' && out.length && out[out.length-1].k==='h' && out[out.length-1].p===b.p && (out[out.length-1].en.length+b.en.length)<200){
+    if(!explicit && b.k==='h' && out.length && out[out.length-1].k==='h' && out[out.length-1].p===b.p && (out[out.length-1].en.length+b.en.length)<200){
       out[out.length-1].en+=' '+b.en; return;
     }
     out.push(b);

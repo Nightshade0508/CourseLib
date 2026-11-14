@@ -62,7 +62,7 @@ export function openSignIn(email,mode){
   if(!cloudOn) return;
   var d=openDialog('signin');
   d._mode=mode==='up'?'up':'in';
-  d.innerHTML='<form class="mform user-form" novalidate>'+
+  d.innerHTML='<form class="mform user-form user-signin" novalidate>'+
     '<h2 class="mtitle"></h2>'+
     '<div class="user-tabs" role="tablist"><button type="button" role="tab" data-mode="in">登录</button><button type="button" role="tab" data-mode="up">注册</button></div>'+
     '<button type="button" class="btn user-google" data-a="google">'+GOOGLE+'<span>用 Google 账号继续</span></button>'+

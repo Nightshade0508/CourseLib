@@ -3,10 +3,10 @@ import { test, expect, openApp } from './helpers.mjs';
 test('the site loads signed out, with its menus and no errors', async ({ page }) => {
   await openApp(page);
   await expect(page).toHaveTitle(/Parallel Text Library/);
-  await expect(page.locator('#acct')).toContainText('未登录');
+  await expect(page.locator('#acct')).toContainText(/登录 \/ 注册|AI 账号/);       // with or without accounts configured
 
   await page.click('#newbtn');
-  await expect(page.locator('.pop .pop-item')).toContainText(['上传 PDF / Word', '粘贴文章', '新建文件夹']);
+  await expect(page.locator('.add-tab')).toHaveText(['文件', '网址', '粘贴文本']);
   await page.keyboard.press('Escape');
 
   await page.click('#moremenu');

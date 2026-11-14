@@ -6,7 +6,7 @@ import {
 } from './state.js';
 import { renderNav } from './nav.js';
 import { show } from './show.js';
-import { closeModal, modal, mroot } from './modal.js';
+import { modal, mroot } from './modal.js';
 import { menu } from './menu.js';
 import { confirmBox, firstDocId, moveDocTo, nudgeDoc, renameBuiltin } from './organize.js';
 import { pdfJobs } from './pdf-extract.js';
@@ -14,6 +14,7 @@ import { uploadPdf } from './upload.js';
 import { deletePdf, renamePdf } from './doc-render.js';
 import { startItemsJob, textItems } from './import-text.js';
 import { importUrl } from './import-url.js';
+import { addTabs, tierField } from './add-doc.js';
 import { aiRetranslate, defaultTier, openingWords } from './free-mt.js';
 import { startTranslate } from './estimate.js';
 
@@ -46,8 +47,8 @@ function renameFolder(f){
 }
 export function folderMenu(f,anchor){
   var items=[{label:'重命名',run:function(){renameFolder(f);}},
-             {label:'在此上传 PDF',run:function(){uploadPdf(f.id);}},
-             {label:'在此添加文档',run:function(){newDoc(f.id);}}];
+             {label:'在此添加文档…',run:function(){uploadPdf(f.id);}},
+             {label:'新建文件夹…',run:newFolder}];
   var hid=BUILTIN_DOCS.filter(function(d){ var p=placement[d.id]||{}; return p.hidden && (p.folder||d.course)===f.id; });
   if(hid.length) items.push({label:'恢复已删除（'+hid.length+'）',run:function(){
     setTimeout(function(){
@@ -74,57 +75,33 @@ export function folderOptions(){
   return folderList().map(function(f){return {value:f.id,label:f.code+(f.name?' — '+f.name:'')};});
 }
 var MAXCHARS=180000;
+// The 粘贴文本 tab of 添加文档. Pasted English is split and translated; "更多选项" also takes text that is
+// already bilingual (English and Chinese paragraphs alternating) or Markdown / HTML, saved as it is.
 export function newDoc(fid){
-  var pending={text:'',name:''};
   modal('添加文档',[
-    {name:'title',label:'标题',placeholder:'例如 Frankenstein, Chapter 5'},
+    {name:'body',label:'内容',type:'textarea',rows:10,
+     placeholder:'把英文文章粘贴到这里（也可以只粘贴一个网址）。'},
+    {name:'title',label:'标题（可选）',placeholder:'留空则自动生成，例如 Frankenstein, Chapter 5'},
+    {name:'folder',label:'放入文件夹',type:'select',options:folderOptions(),value:fid||folderList()[0].id},
+    tierField(),
+    {name:'auto',label:'自动分段并翻译成中英对照',type:'checkbox',value:true},
     {name:'zh',label:'中文标题（可选）',placeholder:'例如《弗兰肯斯坦》第五章'},
     {name:'author',label:'作者 / 出处（可选）'},
-    {name:'folder',label:'放入文件夹',type:'select',options:folderOptions(),value:fid||folderList()[0].id},
-    {name:'format',label:'内容格式',type:'select',options:[
-      {value:'text',label:'纯文本'},{value:'md',label:'Markdown'},{value:'html',label:'HTML'}]},
-    {name:'auto',label:'自动分段并翻译成中英对照（粘贴英文原文即可，标题可留空自动生成）',type:'checkbox',value:false},
     {name:'paired',label:'内容是英文段落与中文段落交替（生成对照排版）',type:'checkbox',value:true},
-    {name:'file',label:'从文件读取（.txt / .md / .html；PDF 会转到自动翻译）',type:'file',accept:'.txt,.md,.markdown,.html,.htm,.pdf,text/plain,text/markdown,text/html,application/pdf',
-     hint:'也可以留空，直接把内容粘贴到下面的文本框。单篇上限约 18 万字符。',
-     after:function(input,refs){
-       input.addEventListener('change',function(){
-         var f=input.files&&input.files[0]; if(!f) return;
-         if(/\.pdf$/i.test(f.name)){
-           var fsel=refs.folder&&refs.folder.value; closeModal();
-           setTimeout(function(){ uploadPdf(fsel,f); },220); return;
-         }
-         if(/\.(docx?|pptx?|xlsx?)$/i.test(f.name)){
-           pending.text=''; pending.name='';
-           var e=mroot.querySelector('.ferr');
-           e.textContent='暂不支持 Word / PPT 等文件。PDF 可以用“上传 PDF”直接翻译。';
-           e.hidden=false; input.value=''; return;
-         }
-         var rd=new FileReader();
-         rd.onload=function(){
-           pending.text=String(rd.result||'');
-           pending.name=f.name;
-           if(refs.body && !refs.body.value) refs.body.value=pending.text.slice(0,MAXCHARS);
-           if(/\.html?$/i.test(f.name)) refs.format.value='html';
-           else if(/\.(md|markdown)$/i.test(f.name)) refs.format.value='md';
-         };
-         rd.readAsText(f);
-       });
-     }},
-    {name:'body',label:'内容',type:'textarea',rows:11,
-     placeholder:'把课文粘贴到这里。若勾选了上面的对照选项，请让英文段落与中文段落交替出现，中间空一行。'}
+    {name:'format',label:'内容格式',type:'select',options:[
+      {value:'text',label:'纯文本'},{value:'md',label:'Markdown'},{value:'html',label:'HTML'}]}
   ],function(v){
-    var body=(v.body||pending.text||'').trim();
+    var body=(v.body||'').trim();
     if(/^https?:\/\/\S+$/i.test(body)){ var fsel=v.folder; setTimeout(function(){ importUrl(fsel,body); },220); return true; }
     if(v.auto){
       if(!body) return {error:'请粘贴英文原文。'};
       if(body.length>MAXCHARS) return {error:'内容过长（'+body.length+' 字符），请拆成两篇。'};
       var ex0={renamed:!!v.title.trim(),zh:v.zh.trim(),author:v.author.trim()};
-      startItemsJob(v.title.trim()||openingWords(body),v.folder,defaultTier(),'paste',Promise.resolve(textItems(body)),ex0);
+      startItemsJob(v.title.trim()||openingWords(body),v.folder,v.tier||defaultTier(),'paste',Promise.resolve(textItems(body)),ex0);
       return true;
     }
     if(!v.title.trim()) return {error:'请填写标题。'};
-    if(!body) return {error:'请粘贴内容，或选择一个文本文件。'};
+    if(!body) return {error:'请粘贴内容。'};
     if(body.length>MAXCHARS) return {error:'内容过长（'+body.length+' 字符），单篇上限约 '+MAXCHARS+' 字符。请拆成两篇。'};
     var id=slug(v.title);
     return db.doc('docs/'+id).set({
@@ -133,6 +110,16 @@ export function newDoc(fid){
       body:body, order:Date.now()/1e6, created:new Date().toISOString()
     }).then(function(){ setCurrent(id); });
   },'添加');
+  addTabs('paste');
+  // the rarely needed options fold away; unticking "translate" opens them, since then they matter
+  var form=mroot.querySelector('.mform'), more=el('details','add-more'), sum=el('summary','','更多选项');
+  more.appendChild(sum);
+  ['auto','zh','author','paired','format'].forEach(function(n){ var f=mroot.querySelector('#f-'+n); if(f) more.appendChild(f.closest('.field')); });
+  form.insertBefore(more,form.querySelector('.ferr'));
+  var auto=mroot.querySelector('#f-auto'), tier=mroot.querySelector('#f-tier');
+  function sync(){ ['paired','format'].forEach(function(n){ mroot.querySelector('#f-'+n).closest('.field').hidden=auto.checked; }); tier.closest('.field').hidden=!auto.checked; }
+  auto.addEventListener('change',function(){ if(!auto.checked) more.open=true; sync(); });
+  sync();
 }
 function editDoc(d){
   var u=userDocs[d.id];

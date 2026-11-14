@@ -8,6 +8,7 @@ import { alertBox, folderOptions } from './db-actions.js';
 import { finishBlocks } from './pdf-extract.js';
 import { startItemsJob } from './import-text.js';
 import { defaultTier } from './free-mt.js';
+import { addTabs, tierField } from './add-doc.js';
 import { articleFromReader } from './lib/article.js';
 
 // Jina Reader: GET <READER><address> returns the page's readable content as Markdown (JSON when asked for).
@@ -63,16 +64,14 @@ export function urlErr(e){
   })[c]||('读取失败：'+((e&&e.message)||'请稍后再试'));
 }
 
+// The 网址 tab of 添加文档.
 export function importUrl(fid,preset){
   if(!db){ alertBox('浏览器禁用了本地存储，无法添加文档。'); return; }
-  modal('从网址导入',[
-    {name:'url',label:'文章网址',placeholder:'https://…',value:preset||'',
-     hint:'粘贴一篇英文文章的网址，自动读取正文、分段并翻译。网页由 Jina Reader 服务读取（网址会发给它）；需要登录或付费才能看的页面读不到。'},
+  modal('添加文档',[
+    {name:'url',label:'文章网址',placeholder:'https://…',value:preset||''},
     {name:'images',label:'保留原文图片',type:'checkbox',value:lsGet('url-images','1')!=='0'},
     {name:'folder',label:'放入文件夹',type:'select',options:folderOptions(),value:fid||folderList()[0].id},
-    {name:'tier',label:'翻译方式',type:'select',value:defaultTier(),options:[
-      {value:'free',label:'免费 · 在浏览器里翻译，不需要登录'},
-      {value:'default',label:'AI 标准 · 译文最讲究（用你的 AI 账号）'},{value:'quick',label:'AI 快速 · 更便宜，先求读懂（用你的 AI 账号）'}]}
+    tierField()
   ],function(v){
     var url=webAddress(v.url);
     if(!url) return {error:'请输入完整的网址，例如 https://example.com/article 。'};
@@ -91,7 +90,7 @@ export function importUrl(fid,preset){
       return {error:urlErr(e)};
     });
   },'读取并翻译');
-  var sel=mroot.querySelector('#f-folder'); if(sel) sel.value=fid||folderList()[0].id;
+  addTabs('url','粘贴一篇英文文章的网址，自动读取正文、分段并翻译。网页由 Jina Reader 服务读取（网址会发给它）；需要登录或付费才能看的页面读不到。');
 }
 
 // a picture that fails to load, or turns out to be a tiny decoration, leaves no hole in the text

@@ -17,7 +17,6 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='?'){ e.preventDefault(); showShortcuts(); }
   else if((e.key==='n'||e.key==='N')&&db){
     e.preventDefault();
-    var nb=document.getElementById('newbtn'), r=nb.getBoundingClientRect();
-    if(r.width&&r.left>=0&&!inFocus()) newMenu(nb); else openCmdk();
+    newMenu();
   }
 });

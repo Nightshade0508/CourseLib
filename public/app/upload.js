@@ -1,45 +1,59 @@
 // Upload dialog and the job that reads, names and stores a PDF.
 import './doc-store.js';
-import { el } from './util.js';
+import { el, icon } from './util.js';
 import { current, db, folderList, setCurrent, userDocs } from './state.js';
 import { setKeepScrollOnce, show } from './show.js';
-import { modal, mroot } from './modal.js';
+import { modal } from './modal.js';
 import { alertBox, folderOptions, slug } from './db-actions.js';
 import { buildBlocks, extractPdf, getSample, ocrPdf, pdfJobs, pdfMem } from './pdf-extract.js';
 import { doneCount, layoutChunks, localStat, metaUpdate, saveAllChunks, setStat } from './doc-store.js';
 import { docxItems, startItemsJob } from './import-text.js';
 import { defaultTier } from './free-mt.js';
 import { readyToTranslate } from './estimate.js';
+import { addTabs, tierField } from './add-doc.js';
+import { fileTextItems } from './import-text.js';
 
+// The 文件 tab of 添加文档: PDF, Word (.docx), or a text file (.txt / .md / .html).
+export var FILE_RE=/\.(pdf|docx|txt|md|markdown|html?)$/i;
 export function uploadPdf(fid,preset,extra){
   if(!db){ alertBox('浏览器禁用了本地存储，无法上传。'); return; }
   var picked=preset||null;
-  var fields=[];
-  if(!preset){
-    fields.push({name:'file',label:'选择 PDF 或 Word 文件',type:'file',accept:'.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      hint:'有文字层的 PDF 直接提取；扫描版会逐页让 AI 识别文字（更慢）。Word 请用 .docx。网页文章用「新建 → 从网址导入」。',
-      after:function(input){ input.addEventListener('change',function(){ picked=input.files&&input.files[0]||null; }); }});
-  }
-  fields.push(
+  modal('添加文档',[
+    {name:'file',label:'文件',type:'file',accept:'.pdf,.docx,.txt,.md,.markdown,.html,.htm,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,text/html',
+      after:function(input){ dropZone(input,picked,function(f){ picked=f; }); }},
     {name:'folder',label:'放入文件夹',type:'select',options:folderOptions(),value:fid||folderList()[0].id},
-    {name:'tier',label:'翻译方式',type:'select',value:defaultTier(),options:[
-      {value:'free',label:'免费 · 在浏览器里翻译，不需要登录'},
-      {value:'default',label:'AI 标准 · 译文最讲究（用你的 AI 账号）'},{value:'quick',label:'AI 快速 · 更便宜，先求读懂（用你的 AI 账号）'}]}
-  );
-  modal(preset?'上传：'+preset.name:'上传 PDF / Word',fields,function(v){
+    tierField()
+  ],function(v){
     var f=picked;
-    if(!f) return {error:'请先选择一个文件。'};
+    if(!f) return {error:'请先选择一个文件，或者把文件拖进来。'};
     if(f.size>60*1024*1024) return {error:'文件太大（超过 60 MB）。'};
     if(/\.docx$/i.test(f.name)){ startItemsJob(f.name,v.folder,v.tier||defaultTier(),'docx',docxItems(f),extra); return true; }
-    if(/\.doc$/i.test(f.name)) return {error:'旧版 .doc 不支持，请在 Word 里另存为 .docx。'};
-    if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf') return {error:'只支持 PDF 或 .docx 文件。'};
+    if(/\.(txt|md|markdown|html?)$/i.test(f.name)){ startItemsJob(f.name,v.folder,v.tier||defaultTier(),'text',fileTextItems(f),extra); return true; }
+    if(/\.(doc|pptx?|xlsx?)$/i.test(f.name)) return {error:'这种文件暂不支持。Word 请另存为 .docx；其他文件可以复制正文，用「粘贴文本」添加。'};
+    if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf') return {error:'支持 PDF、Word（.docx）、TXT、Markdown 和 HTML 文件。'};
     startPdfJob(f,v.folder,v.tier||defaultTier(),extra);
     return true;
-  },'上传并翻译');
-  var t=mroot.querySelector('.mtitle');
-  var p=el('p','fhint','上传后文件名由 AI 根据内容自动生成，之后可以在“⋯ → 重命名”里修改。选「免费」不需要登录，在你的浏览器里翻译；选 AI 方式译文更准确，用你登录的 AI 账号、费用从账号扣除。按篇幅约需几分钟到十几分钟，已译好的段落会先显示出来。');
-  t.parentNode.insertBefore(p,t.nextSibling);
-  var sel=mroot.querySelector('#f-folder'); if(sel) sel.value=fid||folderList()[0].id;
+  },'添加并翻译');
+  addTabs('file',
+    '有文字层的 PDF 直接提取文字；扫描版会逐页让 AI 识别（需要登录 AI 服务，较慢）。文件名会由 AI 换成作品名，之后可以在「⋯ → 重命名」里修改。');
+}
+// The file field as a drop zone: click to choose, or drag a file onto it.
+function dropZone(input,preset,onPick){
+  var zone=el('label','dropzone'); zone.htmlFor=input.id;
+  var t=el('span','dz-t'), s=el('span','dz-s','PDF、Word（.docx）、TXT、Markdown、HTML · 最大 60 MB');
+  zone.appendChild(icon('upload')); zone.appendChild(t); zone.appendChild(s);
+  input.parentNode.insertBefore(zone,input);
+  input.classList.add('dz-input');
+  function paint(f){ zone.classList.toggle('has',!!f); t.textContent=f?f.name:'把文件拖到这里，或点击选择'; }
+  input.addEventListener('change',function(){ var f=input.files&&input.files[0]||null; onPick(f); paint(f); });
+  zone.addEventListener('dragover',function(e){ e.preventDefault(); e.stopPropagation(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave',function(){ zone.classList.remove('over'); });
+  zone.addEventListener('drop',function(e){
+    e.preventDefault(); e.stopPropagation(); zone.classList.remove('over');
+    var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f) return;
+    onPick(f); paint(f);
+  });
+  paint(preset);
 }
 function startPdfJob(file,folder,tier,extra){
   var stem=file.name.replace(/\.pdf$/i,'').replace(/[_]+/g,' ').trim()||'Untitled PDF';

@@ -76,13 +76,18 @@ export async function openApp(page) {
   await page.waitForFunction(() => !!document.querySelector('#acct') && document.querySelector('#acct').textContent.trim().length > 0);
 }
 
-// "新建 → 粘贴文章" with automatic translation.
-export async function pasteArticle(page, text, { title } = {}) {
+// 新建 → 添加文档, tab 文件 / 网址 / 粘贴文本
+export async function openAdd(page, tab) {
   await page.click('#newbtn');
-  await page.locator('.pop-item', { hasText: '粘贴文章' }).click();
   await expect(page.locator('#modal .mtitle')).toHaveText('添加文档');
+  if (tab) await page.locator(`.add-tab[data-tab="${tab}"]`).click();
+  await expect(page.locator('.add-tab.on')).toHaveAttribute('data-tab', tab || 'file');
+}
+// "添加文档 → 粘贴文本" with automatic translation.
+export async function pasteArticle(page, text, { title } = {}) {
+  await openAdd(page, 'paste');
   if (title) await page.locator('#f-title').fill(title);
-  await page.locator('#f-auto').check();
+  await expect(page.locator('#f-auto')).toBeChecked();
   await page.locator('#f-body').fill(text);
   await page.locator('#modal .btn.primary').click();
 }
