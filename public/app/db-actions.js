@@ -24,20 +24,20 @@ export function slug(s){
 }
 export function newFolder(){
   modal('新建文件夹',[
-    {name:'code',label:'课程代号',placeholder:'例如 History 7B'},
-    {name:'name',label:'副标题（可选）',placeholder:'例如 The United States'}
+    {name:'code',label:'文件夹名称',placeholder:'例如 History 7B、毕业论文、周末读物'},
+    {name:'name',label:'说明（可选）',placeholder:'例如 美国史阅读材料'}
   ],function(v){
-    if(!v.code.trim()) return {error:'请填写课程代号。'};
+    if(!v.code.trim()) return {error:'请填写文件夹名称。'};
     var id=slug(v.code);
     return db.doc('folders/'+id).set({code:v.code.trim(),name:v.name.trim(),order:Date.now()/1e6});
   },'创建');
 }
 function renameFolder(f){
   modal('重命名文件夹',[
-    {name:'code',label:'课程代号',value:f.code},
-    {name:'name',label:'副标题',value:f.name||''}
+    {name:'code',label:'文件夹名称',value:f.code},
+    {name:'name',label:'说明',value:f.name||''}
   ],function(v){
-    if(!v.code.trim()) return {error:'请填写课程代号。'};
+    if(!v.code.trim()) return {error:'请填写文件夹名称。'};
     var cur=dbFolders[f.id]||{};
     return db.doc('folders/'+f.id).set({
       code:v.code.trim(), name:v.name.trim(),

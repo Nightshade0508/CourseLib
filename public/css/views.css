@@ -55,3 +55,66 @@ mark.s-hit{background:var(--hl-y);color:inherit;border-radius:2px}
 .docbody.vbody ul.n-list,.docbody.vbody ul.s-list,.docbody.vbody ul.vc-list,.docbody.vbody ul.v-list,.docbody.vbody ul.lec-r{margin-left:0;padding-left:0}
 .docbody p.sep{margin:44px 0;text-align:center;line-height:1}
 .docbody p.sep::before{content:"* * *";letter-spacing:.6em;color:var(--muted);font-family:var(--f-ui);font-size:14px}
+
+/* ---------- 文库: the whole library on one page ---------- */
+.doc.wide{max-width:1120px}
+.lib{font-family:var(--f-ui)}
+.lib-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.lib-search{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;padding:0 12px;height:38px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--muted);transition:border-color .15s var(--ease)}
+.lib-search:focus-within{border-color:var(--ink-2)}
+.lib-search input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:14px;color:var(--ink);outline:none}
+.lib-sel{height:38px;padding:0 10px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px}
+.lib-bar .btn{display:inline-flex;align-items:center;gap:6px;height:38px}
+.lib-bar .btn .ic{width:16px;height:16px}
+.lib-chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 26px}
+.lib-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--rule);border-radius:999px;background:none;color:var(--ink-2);font:inherit;font-size:13px;cursor:pointer;transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease)}
+.lib-chip span{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lib-chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.lib-chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.lib-chip.on span{color:inherit;opacity:.7}
+.lib-group{margin:0 0 34px}
+.lib-gh{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;font-family:var(--f-ui);font-size:15px;font-weight:600;color:var(--ink)}
+.lib-gh .zh{font-family:var(--f-zh);font-size:13px;font-weight:400;color:var(--muted)}
+.lib-n{margin-left:auto;font-size:12px;font-weight:400;color:var(--muted)}
+.lib-gh .icon-btn{align-self:center}
+.lib-list{list-style:none;margin:0;padding:0}
+.as-grid .lib-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.lib-item{position:relative;animation:hub-in .2s var(--ease) both}
+.lib-open{width:100%;height:100%;display:flex;flex-direction:column;gap:6px;text-align:left;padding:16px 16px 14px;border:1px solid var(--rule);border-radius:14px;background:var(--surface);color:inherit;font:inherit;cursor:pointer;transition:border-color .18s var(--ease),box-shadow .18s var(--ease),transform .18s var(--ease)}
+.lib-open:hover{border-color:var(--ink-2);box-shadow:var(--shadow);transform:translateY(-1px)}
+.lib-open:active{transform:none}
+.lib-meta{display:flex;align-items:center;gap:8px;padding-right:26px;font-size:11px;color:var(--muted)}
+.lib-kind{padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.lib-st{color:var(--accent)}
+.lib-date{margin-left:auto;font-variant-numeric:tabular-nums}
+.lib-f{color:var(--ink-2)}
+.lib-t{font-family:var(--f-read);font-size:17px;line-height:1.35;color:var(--ink);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.lib-z{font-family:var(--f-zh);font-size:13px;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-a{font-size:12px;color:var(--muted)}
+.lib-p{margin-top:auto;padding-top:8px;height:3px;box-sizing:content-box;display:block;background:linear-gradient(var(--rule),var(--rule)) bottom/100% 3px no-repeat;border-radius:3px;position:relative}
+.lib-p span{position:absolute;left:0;bottom:0;height:3px;border-radius:3px;background:var(--accent)}
+.lib-more{position:absolute;top:8px;right:8px;opacity:.55;transition:opacity .15s var(--ease)}
+.lib-item:hover .lib-more,.lib-more:focus-visible{opacity:1}
+/* list: one row per document */
+.as-list .lib-list{display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.as-list .lib-open{flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:14px;row-gap:2px;padding:12px 44px 12px 4px;border:0;border-bottom:1px solid var(--rule);border-radius:0;background:none}
+.as-list .lib-open:hover{box-shadow:none;transform:none;background:var(--panel)}
+.as-list .lib-meta{order:3;margin-left:auto;padding-right:0}
+.as-list .lib-t{font-size:15.5px;-webkit-line-clamp:1}
+.as-list .lib-z{-webkit-line-clamp:1}
+.as-list .lib-a{order:4}
+.as-list .lib-p{position:absolute;left:4px;right:44px;bottom:-1px;padding:0;height:2px;background:none}
+.as-list .lib-p span{height:2px}
+.as-list .lib-more{top:50%;transform:translateY(-50%)}
+.lib-empty{text-align:center;padding:56px 20px;border:1.5px dashed var(--rule);border-radius:18px}
+.lib-empty-t{margin:0 0 6px;font-size:16px;font-weight:600;color:var(--ink)}
+.lib-empty-s{margin:0 0 18px;font-size:13.5px;color:var(--muted)}
+.lib-empty-f,.lib-none,.lib-count{font-size:13px;color:var(--muted);margin:0 0 12px}
+.lib-empty-f .lnk{border:0;background:none;padding:0;margin-left:4px;color:var(--ink-2);font:inherit;text-decoration:underline;text-underline-offset:.2em;cursor:pointer}
+@media (max-width:640px){
+  .lib-bar .btn span{display:none}
+  .lib-search{min-width:0;flex-basis:100%}
+  .as-grid .lib-list{grid-template-columns:1fr}
+  .as-list .lib-meta{order:0;margin-left:0;flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){.lib-item{animation:none}.lib-open,.lib-open:hover{transition:none;transform:none}}

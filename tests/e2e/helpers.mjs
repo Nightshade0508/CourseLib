@@ -78,7 +78,9 @@ export async function openApp(page) {
 
 // 新建 → 添加文档, tab 文件 / 网址 / 粘贴文本
 export async function openAdd(page, tab) {
-  await page.click('#newbtn');
+  const nb = await page.locator('#newbtn').boundingBox();
+  if (nb && nb.x >= 0) await page.click('#newbtn');
+  else await page.keyboard.press('n');                     // on a phone the sidebar is closed
   await expect(page.locator('#modal .mtitle')).toHaveText('添加文档');
   if (tab) await page.locator(`.add-tab[data-tab="${tab}"]`).click();
   await expect(page.locator('.add-tab.on')).toHaveAttribute('data-tab', tab || 'file');

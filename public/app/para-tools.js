@@ -1,5 +1,5 @@
 // Per-paragraph tools for uploaded documents: edit, retranslate, merge.
-import './progress.js';
+import './library.js';
 import { el, icon, noop } from './util.js';
 import { current, db, userDocs } from './state.js';
 import { setKeepScrollOnce, show } from './show.js';

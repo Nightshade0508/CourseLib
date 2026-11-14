@@ -25,6 +25,7 @@ function cmdkActions(){
   a('跳转','我的标注','note',function(){ show('view:notes'); });
   a('跳转','生词本','book',function(){ show('view:vocab'); });
   if(db){
+    a('跳转','文库','grid',function(){ show('view:library'); },'全部读物，按文件夹浏览');
     a('新建','添加文档 · 文件','upload',function(){ uploadPdf(); },'PDF、Word、TXT、Markdown、HTML','N');
     a('新建','添加文档 · 网址','link',function(){ importUrl(); },'粘贴文章网址，自动读取正文并翻译');
     a('新建','添加文档 · 粘贴文本','file-plus',function(){ newDoc(); },'粘贴英文原文，或已有的中英文');

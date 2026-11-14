@@ -16,11 +16,13 @@ import { flashBlock, todayISO } from './study.js';
 import { speakWord, vocab } from './vocab.js';
 import { progress } from './progress.js';
 import { openCmdk } from './palette.js';
+import { viewLibrary } from './library.js';
 
 var searchQ='';
 export function setSearchQ(v){ return searchQ=v; }
 export function renderView(id,pane){
   if(id==='view:home') return viewHome(pane);
+  if(id==='view:library') return viewLibrary(pane);
   if(id==='view:notes') return viewNotes(pane);
   if(id==='view:vocab') return viewVocab(pane);
   if(id==='view:search') return viewSearch(pane);
@@ -48,12 +50,14 @@ function viewHome(pane){
   h+='<h2>Getting started<span class="zh">三步开始</span></h2><ol class="v-steps">'+
     '<li><b>AI 账号（可选）</b>：'+(acct?'已登录 '+esc(acct.label)+'。':'不登录也能用免费翻译和查词；登录后译文更准确，还能让 AI 解释段落、生成学习卡片，费用从你自己的账号扣。')+
       ' <button type="button" class="btn ghost sm" data-acct>'+(acct?'账号设置':'登录')+'</button></li>'+
-    '<li><b>添加文档</b>：点侧栏底部的「新建」（或按 <kbd>N</kbd>），上传 PDF、Word，粘贴文章，或者直接给一个文章网址。</li>'+
+    '<li><b>添加文档</b>：点侧栏底部的「新建」（或按 <kbd>N</kbd>），选一个文件、给一个文章网址，或者粘贴文本；也可以直接把文件拖进页面。</li>'+
     '<li><b>阅读</b>：译好的段落会先显示；选中文字可以高亮、查词、让 AI 解释，耳机按钮可以本地朗读。</li></ol>';
   var rec=Object.keys(progress).filter(docExists).sort(function(a,b){ return (progress[b].at||0)-(progress[a].at||0); }).slice(0,6);
   if(rec.length){
     h+='<h2>Continue reading<span class="zh">最近在读</span></h2><ul class="v-list">'+rec.map(function(id){ var m=docMeta(id); return '<li><button type="button" class="v-doc" data-open="'+esc(id)+'"><span class="v-t">'+esc(m.title)+'</span>'+progBar(id)+'</button></li>'; }).join('')+'</ul>';
   }
+  var nDocs=Object.keys(userDocs).length;
+  if(nDocs) h+='<p class="v-tip"><button type="button" class="btn ghost sm" data-open="view:library">打开文库（'+nDocs+' 篇）</button></p>';
   var due=Object.keys(vocab).filter(function(k){ return (vocab[k].due||0)<=Date.now(); }).length;
   if(due) h+='<p class="v-tip"><button type="button" class="btn ghost sm" data-open="view:vocab">复习生词（'+due+' 个到期）</button></p>';
   var samples=BUILTIN_DOCS.filter(function(d){ return docExists(d.id); });
@@ -286,7 +290,7 @@ export function navTools(){
 function navToolItems(wrap){
   var due=Object.keys(vocab).filter(function(k){ return (vocab[k].due||0)<=Date.now(); }).length;
   var nm=Object.keys(marks).filter(function(k){ return marks[k]&&marks[k].d; }).length;
-  [['view:home','home','首页',''],['view:notes','note','我的标注',nm?String(nm):''],['view:vocab','book','生词本',due?due+' 到期':(Object.keys(vocab).length?String(Object.keys(vocab).length):'')]].forEach(function(x){
+  [['view:home','home','首页',''],['view:library','grid','文库',''],['view:notes','note','我的标注',nm?String(nm):''],['view:vocab','book','生词本',due?due+' 到期':(Object.keys(vocab).length?String(Object.keys(vocab).length):'')]].forEach(function(x){
     var b=el('button','tool-item'+(current===x[0]?' on':'')); b.type='button';
     b.innerHTML='<svg class="ic"><use href="#i-'+x[1]+'"></use></svg><span>'+x[2]+'</span>'+(x[3]?'<span class="ti-n">'+esc(x[3])+'</span>':'');
     b.addEventListener('click',function(){ show(x[0]); });

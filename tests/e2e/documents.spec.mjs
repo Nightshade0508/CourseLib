@@ -79,6 +79,7 @@ test('folders can be created and documents deleted', async ({ page }) => {
   await page.keyboard.press('Control+k');
   await page.keyboard.type('新建文件夹');
   await page.keyboard.press('Enter');
+  await expect(page.locator('#modal .mtitle')).toHaveText('新建文件夹');
   await page.locator('#modal .finput').first().fill('HIST 7B');
   await page.locator('#modal .btn.primary').click();
   await expect(page.locator('#nav')).toContainText('HIST 7B');
@@ -95,6 +96,7 @@ test('添加文档: three tabs that keep the chosen folder and method, a drop zo
   await page.keyboard.press('Control+k');
   await page.keyboard.type('新建文件夹');
   await page.keyboard.press('Enter');
+  await expect(page.locator('#modal .mtitle')).toHaveText('新建文件夹');
   await page.locator('#modal .finput').first().fill('Week 3');
   await page.locator('#modal .btn.primary').click();
   await expect(page.locator('#nav')).toContainText('Week 3');

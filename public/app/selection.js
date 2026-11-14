@@ -68,7 +68,7 @@ export function actNote(){
   var blocks=getBlocks(curPane()), segsCopy=segs.slice();
   var txt=segsCopy.map(function(g){ return blocks[g.b]?blocks[g.b].textContent.slice(g.s,g.e):''; }).join(' … ');
   hideSelbar();
-  modal('添加笔记',[{name:'note',label:'“'+(txt.length>80?txt.slice(0,78)+'…':txt)+'”',type:'textarea',rows:5,placeholder:'写下你的想法、问题或和课程的联系…'}],function(v){
+  modal('添加笔记',[{name:'note',label:'“'+(txt.length>80?txt.slice(0,78)+'…':txt)+'”',type:'textarea',rows:5,placeholder:'写下你的想法、问题或和其他读物的联系…'}],function(v){
     if(!v.note.trim()) return {error:'笔记不能为空。'};
     var g=segsCopy[segsCopy.length-1], first=segsCopy[0];
     segsCopy.forEach(function(s,i){ putMark({d:current,b:s.b,s:s.s,e:s.e,t:'n',note:i===segsCopy.length-1?v.note.trim():'',x:blocks[s.b]?blocks[s.b].textContent.slice(s.s,s.e):'',at:Date.now()}); });

@@ -6,6 +6,7 @@ import { show } from './show.js';
 import { docMenu, folderMenu } from './db-actions.js';
 import { dndFolder, dndItem, dragId, setNavDirty } from './organize.js';
 import { navTools } from './views.js';
+import { refreshLibrary } from './library.js';
 import { progress } from './progress.js';
 
 export var navRoot=document.getElementById('nav');
@@ -66,4 +67,5 @@ export function renderNav(){
     var n=el('p','side-note','浏览器禁用了本地存储，编辑功能不可用。');
     navRoot.appendChild(n);
   }
+  refreshLibrary();
 }

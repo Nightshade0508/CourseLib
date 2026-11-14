@@ -54,6 +54,7 @@ function showBase(id){
   var viewPane=document.getElementById('viewpane');
   if(/^view:/.test(id)){
     unwatchPdf();
+    viewPane.classList.remove('wide');
     renderView(id,viewPane); viewPane.hidden=false;
     renderNav();
     var keepV=keepScrollOnce; keepScrollOnce=false;
