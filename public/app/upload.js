@@ -55,7 +55,7 @@ function dropZone(input,preset,onPick){
   });
   paint(preset);
 }
-function startPdfJob(file,folder,tier,extra){
+export function startPdfJob(file,folder,tier,extra){
   var stem=file.name.replace(/\.pdf$/i,'').replace(/[_]+/g,' ').trim()||'Untitled PDF';
   var id=slug(stem).slice(0,60);
   var job=pdfJobs[id]={running:true,stop:false,ctls:[]};
@@ -70,12 +70,12 @@ function startPdfJob(file,folder,tier,extra){
   }).then(function(r){
     var items=buildBlocks(r.pages), chars=0;
     items.forEach(function(it){ chars+=it.en.length; });
-    metaUpdate(id,{'src':{name:file.name,size:file.size,pages:r.pages.length,scanned:false}});
+    metaUpdate(id,{'src':Object.assign({},meta.src,{name:file.name,size:file.size,pages:r.pages.length,scanned:false})});
     if(chars < r.pages.length*150){
       return getSample().then(function(s){
         if(!s) throw {code:'no_sample'};
         if(!(window.PTL&&PTL.account())) throw {code:'scan_needs_ai'};
-        metaUpdate(id,{status:'ocr',src:{name:file.name,size:file.size,pages:r.pages.length,scanned:true}});
+        metaUpdate(id,{status:'ocr',src:Object.assign({},meta.src,{name:file.name,size:file.size,pages:r.pages.length,scanned:true})});
         return ocrPdf(id,r.pdf,s,job);
       }).then(function(its){ return {items:its,meta:r.meta}; });
     }
@@ -88,7 +88,7 @@ function startPdfJob(file,folder,tier,extra){
       return metaUpdate(id,{n:dc[1],done:0,status:'naming',beat:Date.now()});
     }).then(function(){
       if(current===id){ setKeepScrollOnce(true); show(id); }
-      return nameDoc(id,data,file.name,r.meta);
+      return extra&&extra.renamed?null:nameDoc(id,data,file.name,r.meta);
     });
   }).then(function(){
     job.running=false;

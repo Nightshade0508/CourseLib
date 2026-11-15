@@ -65,6 +65,7 @@ export function modal(title, fields, onSubmit, submitLabel){
     });
     Promise.resolve(onSubmit(vals,refs)).then(function(r){
       if(r&&r.error){ err.textContent=r.error; err.hidden=false; }
+      else if(r&&r.keep){ err.hidden=true; }
       else closeModal();
     }).catch(function(ex){
       err.textContent='保存失败：'+((ex&&ex.message)||'请稍后再试'); err.hidden=false;

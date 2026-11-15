@@ -67,7 +67,7 @@ export function runTranslate(id){
 // A web article arrives with its own title; without an AI account nothing names it in Chinese, so translate the title too.
 function freeTitle(id){
   var m=userDocs[id]||{};
-  if(m.zh||m.renamed||!m.title||!(m.src&&m.src.kind==='url')) return;
+  if(m.zh||!m.title||!(m.src&&(m.src.kind==='url'||m.src.kind==='find'))||(m.renamed&&m.src.kind!=='find')) return;
   PTL.mt.translate(m.title).then(function(z){
     z=String(z||'').trim();
     if(z&&!(userDocs[id]||{}).zh) metaUpdate(id,{zh:z.slice(0,60)});

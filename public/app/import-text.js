@@ -57,12 +57,14 @@ export function textItems(text){
 }
 /* generic job starter for docx / pasted text (PDF keeps its own path) */
 // pm: {title, author} already known from the source (a web page's own title), passed on to the naming step
-export function startItemsJob(name,folder,tier,kind,itemsP,extra,pm){
+// opts.background: create it without opening it; opts.hold: wait for 开始翻译 even when it would start by itself
+export function startItemsJob(name,folder,tier,kind,itemsP,extra,pm,opts){
+  opts=opts||{};
   var stem=String(name||'Untitled').replace(/\.(docx?|txt|md)$/i,'').trim()||'Untitled';
   var id=slug(stem).slice(0,60);
   var job=pdfJobs[id]={running:true,stop:false,ctls:[]};
   localStat[id]={status:'reading'};
-  setCurrent(id);
+  if(!opts.background) setCurrent(id);
   var meta=Object.assign({title:stem,zh:'',author:'',folder:folder,format:'pdf',status:'reading',n:0,done:0,tier:tier,
     src:{name:name,kind:kind},order:Date.now()/1e6,created:new Date().toISOString(),beat:Date.now(),renamed:false,glossary:[]},extra||{});
   userDocs[id]=meta;
@@ -74,7 +76,7 @@ export function startItemsJob(name,folder,tier,kind,itemsP,extra,pm){
       if(current===id){ setKeepScrollOnce(true); show(id); }
       return extra&&extra.renamed?null:nameDoc(id,data,name,pm||{title:'',author:''});
     });
-  }).then(function(){ job.running=false; readyToTranslate(id,kind==='paste'||kind==='url'); }).catch(function(e){
+  }).then(function(){ job.running=false; readyToTranslate(id,kind==='paste'||kind==='url'||kind==='find',opts.hold); return id; }).catch(function(e){
     job.running=false; setStat(id,{status:'paused'});
     metaUpdate(id,{status:pdfMem[id]?'paused':'error',err:pdfErr(e)});
   });

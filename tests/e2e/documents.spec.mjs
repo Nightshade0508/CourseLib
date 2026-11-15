@@ -89,7 +89,7 @@ test('folders can be created and documents deleted', async ({ page }) => {
   await expect(page.locator('.navitem', { hasText: 'Delete Me' })).toHaveCount(1);
 });
 
-test('添加文档: three tabs that keep the chosen folder and method, a drop zone, text files, and dropping a file on the page', async ({ page }) => {
+test('添加文档: tabs that keep the chosen folder and method, a drop zone, text files, and dropping a file on the page', async ({ page }) => {
   await mockAI(page);
   await fakeBrowserTranslator(page);
   await openApp(page);
@@ -103,7 +103,7 @@ test('添加文档: three tabs that keep the chosen folder and method, a drop zo
   await expect(page.locator('#modal')).toBeHidden();
 
   await page.keyboard.press('n');                                    // N opens the dialog straight away
-  await expect(page.locator('.add-tab')).toHaveText(['文件', '网址', '粘贴文本']);
+  await expect(page.locator('.add-tab')).toHaveText(['文件', '网址', '粘贴文本', '找资料']);
   await expect(page.locator('.dropzone')).toContainText('把文件拖到这里');
   const week3 = await page.locator('#f-folder option', { hasText: 'Week 3' }).getAttribute('value');
   await page.locator('#f-folder').selectOption(week3);

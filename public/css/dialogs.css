@@ -60,3 +60,37 @@ details.add-more[open] summary{margin-bottom:8px}
 .drop-card b{font-size:16px;color:var(--ink)}
 .drop-card span{font-size:12.5px;color:var(--muted)}
 .drop-shade *{pointer-events:none}
+
+/* ---------- 找资料 ---------- */
+.add-tabs:has(.add-tab:nth-child(4)){grid-template-columns:repeat(4,1fr)}
+.find-row{display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:end}
+.find-row .field{margin:0}
+.find-box:empty{display:none}
+.find-box{font-family:var(--f-ui);max-height:min(52vh,520px);overflow:auto;margin:0 -4px;padding:0 4px;overscroll-behavior:contain}
+.find-status,.find-none,.find-notes{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.find-notes{margin-top:10px}
+.find-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.find-item{padding:14px 16px;border:1px solid var(--rule);border-radius:12px;background:var(--surface);animation:hub-in .18s var(--ease) both}
+.find-item:not(.can){background:var(--panel)}
+.find-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-bottom:6px}
+.find-kind{padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.find-lic{color:var(--accent)}
+.find-t{display:block;font-family:var(--f-read);font-size:16px;line-height:1.35;color:var(--ink);text-decoration:none}
+.find-t:hover{text-decoration:underline;text-underline-offset:.2em}
+.find-a{margin-top:3px;font-size:12px;color:var(--ink-2)}
+.find-abs{margin:8px 0 0;font-size:12.5px;line-height:1.55;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.find-note{margin:6px 0 0;font-size:11.5px;color:var(--muted)}
+.find-act{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.find-act a.btn{text-decoration:none}
+.find-why{font-size:12px;color:var(--muted)}
+.find-book .lnk,.find-pick .lnk{border:0;background:none;padding:0;color:var(--ink-2);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:.2em;cursor:pointer}
+.find-bt{margin:12px 0 2px;font-family:var(--f-read);font-size:17px;color:var(--ink)}
+.find-pick{display:flex;align-items:center;gap:14px;margin:12px 0 6px;font-size:12.5px}
+.find-sum{margin-left:auto;color:var(--muted)}
+.find-ch{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.find-ch li{border-bottom:1px solid var(--rule)}
+.find-ch label{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:13.5px;cursor:pointer}
+.find-ch input{accent-color:var(--accent)}
+.find-cht{flex:1;color:var(--ink)}
+.find-chw{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:640px){.find-row{grid-template-columns:1fr}.add-tab span{font-size:12.5px}.add-tab .ic{display:none}}

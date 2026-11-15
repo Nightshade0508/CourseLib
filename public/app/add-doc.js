@@ -8,9 +8,10 @@ import { newDoc } from './db-actions.js';
 import { FILE_RE, uploadPdf } from './upload.js';
 import { importUrl } from './import-url.js';
 import { defaultTier } from './free-mt.js';
+import { openFind } from './find.js';
 
-var TABS=[['file','文件','upload'],['url','网址','link'],['paste','粘贴文本','file-plus']];
-export function addDoc(tab,fid,preset){ (tab==='url'?importUrl:tab==='paste'?newDoc:uploadPdf)(fid,preset); }
+var TABS=[['file','文件','upload'],['url','网址','link'],['paste','粘贴文本','file-plus'],['find','找资料','search']];
+export function addDoc(tab,fid,preset){ ({url:importUrl,paste:newDoc,find:openFind}[tab]||uploadPdf)(fid,preset); }
 
 export function tierField(){
   return {name:'tier',label:'翻译方式',type:'select',value:defaultTier(),options:[

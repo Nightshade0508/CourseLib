@@ -52,9 +52,10 @@ export function renderEstimate(id,box){
 }
 // a new document waits for the reader to see its estimate; small pasted texts start straight away
 var AUTO_START_USD=0.05;
-export function readyToTranslate(id,autoIfCheap){
+export function readyToTranslate(id,autoIfCheap,wait){
   var z=trSize(id), acc=window.PTL&&PTL.account();
   function hold(){ if(userDocs[id]) userDocs[id].status='paused'; setStat(id,{status:'paused'}); metaUpdate(id,{status:'paused',err:''}); }
+  if(wait&&z){ hold(); return; }
   if(!z){ runTranslate(id); return; }
   // free translation starts by itself once its model is on this device
   if((userDocs[id]||{}).tier==='free'){ hold(); PTL.mt.status().then(function(st){ if(st.ready) runTranslate(id); },noop); return; }

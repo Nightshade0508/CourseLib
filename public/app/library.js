@@ -10,7 +10,7 @@ import { progress } from './progress.js';
 import { addDoc } from './add-doc.js';
 
 var S={q:'',folder:lsGet('lib-folder','all'),sort:lsGet('lib-sort','recent'),layout:lsGet('lib-layout','grid')};
-var KIND={pdf:'PDF',docx:'Word',url:'网页',paste:'粘贴',text:'文本'};
+var KIND={pdf:'PDF',docx:'Word',url:'网页',paste:'粘贴',text:'文本',find:'论文',book:'公版书'};
 
 function allDocs(){
   var out=[];

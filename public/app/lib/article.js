@@ -47,13 +47,13 @@ export function markdownBlocks(md,opts){
     seen[src]=1; nImg++;
     out.push({k:'img',en:'',src:src,alt:plainText(alt).replace(/^Image \d+(?:,\d+)*:?\s*/i,'')});
   }
-  function flush(kind){
+  function flush(kind,lv){
     if(!buf.length) return;
     var raw=park(buf.join(' ')); buf=[];
     raw=raw.replace(LINKED_IMG_RE,'$1').replace(IMG_RE,function(m,alt,src){ image(alt,src); return ' '; });
     var text=plainText(raw);                       // still parked: plainText puts the escaped characters back
     if(!kind&&/^[↑^]\s*\S/.test(text)){ kind='ref'; text=text.replace(/^[↑^]\s*/,''); }   // a footnote's "back to text" arrow
-    if(text.length>=2||/^\d$/.test(text)) out.push({k:kind||'p',en:text});
+    if(text.length>=2||/^\d$/.test(text)){ var b={k:kind||'p',en:text}; if(lv) b.lv=lv; out.push(b); }
   }
   String(md||'').replace(/\r\n?/g,'\n').split('\n').forEach(function(line){
     var m;
@@ -61,8 +61,8 @@ export function markdownBlocks(md,opts){
     if((m=/^\s*(```+|~~~+)/.exec(line))){ flush(); fence=m[1].slice(0,3); return; }
     line=line.replace(/^\s*(?:>\s?)+/,'');                                       // quotations read as paragraphs
     if(!line.trim()){ flush(); return; }
-    if((m=/^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line))){ flush(); buf=[m[2]]; flush('h'); return; }
-    if(/^\s{0,3}(?:=+|-{2,})\s*$/.test(line)&&buf.length===1&&!/^\s*(?:[*+-]|\d+[.)])\s/.test(buf[0])){ flush('h'); return; }   // setext heading
+    if((m=/^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line))){ flush(); buf=[m[2]]; flush('h',m[1].length); return; }
+    if(/^\s{0,3}(?:=+|-{2,})\s*$/.test(line)&&buf.length===1&&!/^\s*(?:[*+-]|\d+[.)])\s/.test(buf[0])){ flush('h',/=/.test(line)?1:2); return; }   // setext heading
     if(/^\s{0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/.test(line)){ flush(); out.push({k:'p',en:'* * *'}); return; }
     if(/^\s*\|?[\s:|-]*-{3,}[\s:|-]*\|?\s*$/.test(line)&&line.indexOf('|')>=0) return;                       // table rule
     if(/^\s*\|.*\|\s*$/.test(line)){ flush(); buf=[line.trim().replace(/^\||\|$/g,'').split('|').map(function(c){ return c.trim(); }).filter(Boolean).join(' — ')]; flush(); return; }

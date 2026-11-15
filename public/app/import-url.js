@@ -13,7 +13,7 @@ import { articleFromReader } from './lib/article.js';
 
 // Jina Reader: GET <READER><address> returns the page's readable content as Markdown (JSON when asked for).
 // It is free without a key (about 20 pages a minute per visitor) and may be called straight from a browser.
-var READER='https://r.jina.ai/';
+export var READER='https://r.jina.ai/';
 var MAX_ARTICLE=400000;
 
 // "example.com/a" → "https://example.com/a"; anything that is not a web address → ''

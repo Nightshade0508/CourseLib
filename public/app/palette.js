@@ -7,6 +7,7 @@ import { closePop } from './menu.js';
 import { newDoc, newFolder } from './db-actions.js';
 import { uploadPdf } from './upload.js';
 import { importUrl } from './import-url.js';
+import { addDoc } from './add-doc.js';
 import { docExists, setSearchQ } from './views.js';
 import { progress } from './progress.js';
 import { FS, closeTypo, openTypo, setTypo, typo } from './typography.js';
@@ -28,6 +29,7 @@ function cmdkActions(){
     a('跳转','文库','grid',function(){ show('view:library'); },'全部读物，按文件夹浏览');
     a('新建','添加文档 · 文件','upload',function(){ uploadPdf(); },'PDF、Word、TXT、Markdown、HTML','N');
     a('新建','添加文档 · 网址','link',function(){ importUrl(); },'粘贴文章网址，自动读取正文并翻译');
+    a('新建','找资料','search',function(){ addDoc('find'); },'搜索公版书和开放获取论文，导入并翻译');
     a('新建','添加文档 · 粘贴文本','file-plus',function(){ newDoc(); },'粘贴英文原文，或已有的中英文');
     a('新建','新建文件夹','folder-plus',newFolder);
   }
