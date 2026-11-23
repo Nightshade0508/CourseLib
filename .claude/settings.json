@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "heydamir": {
+      "source": {
+        "source": "github",
+        "repo": "heydamir/unslop"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "unslop@heydamir": true
+  }
+}
